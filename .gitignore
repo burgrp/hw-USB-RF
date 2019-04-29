@@ -1,0 +1,9 @@
+*.bak
+*.bck
+*.kicad_pcb-bak
+*-cache.lib
+build
+node_modules
+fw/build
+gerber.zip
+gerber
