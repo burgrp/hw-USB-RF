@@ -58,6 +58,7 @@
     (pad_size 1.5 1.5)
     (pad_drill 0.6)
     (pad_to_mask_clearance 0)
+    (solder_mask_min_width 0.25)
     (aux_axis_origin 0 0)
     (visible_elements FFFFFF7F)
     (pcbplotparams
@@ -84,9 +85,9 @@
       (subtractmaskfromsilk false)
       (outputformat 1)
       (mirror false)
-      (drillshape 1)
+      (drillshape 0)
       (scaleselection 1)
-      (outputdirectory ""))
+      (outputdirectory "gerber/"))
   )
 
   (net 0 "")
@@ -1088,7 +1089,7 @@
   (segment (start 132.2 98.84) (end 132.04 99) (width 0.25) (layer F.Cu) (net 19))
   (segment (start 132.2 95.81) (end 132.2 98.84) (width 0.25) (layer F.Cu) (net 19))
 
-  (zone (net 4) (net_name +3V3) (layer F.Cu) (tstamp 0) (hatch edge 0.508)
+  (zone (net 4) (net_name +3V3) (layer F.Cu) (tstamp 5D77CB8F) (hatch edge 0.508)
     (connect_pads (clearance 0.508))
     (min_thickness 0.254)
     (fill yes (arc_segments 16) (thermal_gap 0.508) (thermal_bridge_width 0.508))
@@ -1254,7 +1255,7 @@
       )
     )
   )
-  (zone (net 3) (net_name GND) (layer B.Cu) (tstamp 0) (hatch edge 0.508)
+  (zone (net 3) (net_name GND) (layer B.Cu) (tstamp 5D77CB8C) (hatch edge 0.508)
     (connect_pads (clearance 0.508))
     (min_thickness 0.254)
     (fill yes (arc_segments 16) (thermal_gap 0.508) (thermal_bridge_width 0.508))
