@@ -48,10 +48,14 @@ public:
 
 		atsamd::safeboot::init(SAFE_BOOT_PIN, false, LED_PIN);
 
+		//////////////////////////////////////////////////////////////////////////
+
 		// enable external crystal oscillator		
 		target::SYSCTRL.XOSC.setGAIN(3);
 		target::SYSCTRL.XOSC.setXTALEN(1);
 		target::SYSCTRL.XOSC.setENABLE(1);
+
+		//////////////////////////////////////////////////////////////////////////
 
 		// GEN1: divide output to 4MHz to be suitable for 32kHz division later
 		target::GCLK.GENDIV = 3 << 8 | 1;
@@ -62,12 +66,16 @@ public:
 		// wait for XOSC ready
 		while(!target::SYSCTRL.PCLKSR.getXOSCRDY());
 
+		//////////////////////////////////////////////////////////////////////////
+
 		// GEN3: divide output to 32kHz
 		target::GCLK.GENDIV = 125 << 8 | 3;
 
 		// GEN3: generator enabled, sourced from GEN1
 		target::GCLK.GENCTRL = 1 << 16 | 2 << 8 | 3; 
 
+		//////////////////////////////////////////////////////////////////////////
+		
 		// FLL48: sourced from GEN3 (32kHz)
 		target::GCLK.CLKCTRL = 1 << 14 | 3 << 8 | 0x00; 
 	
@@ -92,11 +100,34 @@ public:
 		// does not work: target::SYSCTRL.DFLLCTRL.setMODE(1);		
 		target::SYSCTRL.DFLLCTRL = 3 << 1; 
 
-		
+		//////////////////////////////////////////////////////////////////////////
+
+		// PLL96: sourced from GEN3 (32kHz)
+		target::GCLK.CLKCTRL = 1 << 14 | 3 << 8 | 0x01; 
+
+		// PLL96: reference clock is GCLK_DPLL
+		target::SYSCTRL.DPLLCTRLB.setREFCLK(2);
+
+		// PLL96: output to 46.276MHz, twice the RF chip frequency, divide by 2 later in GEN4
+		target::SYSCTRL.DPLLRATIO.setLDR(1445);
+		target::SYSCTRL.DPLLRATIO.setLDRFRAC(2);
+
+		// PLL96: enable
+		target::SYSCTRL.DPLLCTRLA.setENABLE(1);
+
+		//////////////////////////////////////////////////////////////////////////
+
+
 		target::PORT.OUT.setOUT(1 << LED_PIN);
 
-		// GEN 4: output enabled, generator enabled, sourced from DFLL48
-		target::GCLK.GENCTRL = 1 << 19 | 1 << 16 | 7 << 8 | 4; 
+		// GEN 4: output enabled, generator enabled, sourced from FLL48
+		// target::GCLK.GENCTRL = 1 << 19 | 1 << 16 | 7 << 8 | 4; 
+
+		// GEN 4: divide PLL96 by two
+		target::GCLK.GENDIV = 2 << 8 | 4;
+
+		// GEN 4: output enabled, generator enabled, sourced from PLL96
+		target::GCLK.GENCTRL = 1 << 19 | 1 << 16 | 8 << 8 | 4; 
 
 
 //target::PORT.OUTTGL.setOUTTGL(1 << LED_PIN);
