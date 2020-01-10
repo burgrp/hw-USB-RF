@@ -647,6 +647,4 @@ F 3 "" H 4000 4700 50  0001 C CNN
 	1    4000 4700
 	0    -1   -1   0   
 $EndComp
-Text Notes 4500 5300 0    50   ~ 0
-ERROR - ROTATED CRYSTAL
 $EndSCHEMATC
