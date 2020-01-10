@@ -109,7 +109,7 @@ public:
 		target::SYSCTRL.DPLLCTRLB.setREFCLK(2);
 
 		// PLL96: output to 46.276MHz, twice the RF chip frequency, divide by 2 later in GEN4
-		target::SYSCTRL.DPLLRATIO.setLDR(1445);
+		target::SYSCTRL.DPLLRATIO.setLDR(1695);
 		target::SYSCTRL.DPLLRATIO.setLDRFRAC(2);
 
 		// PLL96: enable
