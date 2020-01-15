@@ -9,6 +9,7 @@
 	},
 	"silicon": {
 		"sources": [
+			"mark.cpp",
 			"inner.cpp",
 			"safeboot.cpp",
 			"app.cpp"
