@@ -70,33 +70,38 @@ public:
 
     //////////////////////////////////////////////////////////////////////////
 
-    // FLL48: clocked from GEN3 (32kHz)
-    target::GCLK.CLKCTRL = 1 << 14 | 3 << 8 | 0x00;
+    // // FLL48: clocked from GEN3 (32kHz)
+    // target::GCLK.CLKCTRL = 1 << 14 | 3 << 8 | 0x00;
 
-    // FLL48: enable
-    // does not work: target::SYSCTRL.DFLLCTRL.setENABLE(1);
-    target::SYSCTRL.DFLLCTRL = 1 << 1;
-    while (!target::SYSCTRL.PCLKSR.getDFLLRDY())
-      ;
+    // // FLL48: enable
+    // // does not work: target::SYSCTRL.DFLLCTRL.setENABLE(1);
+    // target::SYSCTRL.DFLLCTRL = 1 << 1;
+    // while (!target::SYSCTRL.PCLKSR.getDFLLRDY())
+    //   ;
 
-    // FLL48: coarse step
-    target::SYSCTRL.DFLLVAL.setCOARSE(100);
-    while (!target::SYSCTRL.PCLKSR.getDFLLRDY())
-      ;
+    // // FLL48: coarse step
+    // target::SYSCTRL.DFLLVAL.setCOARSE(100);
+    // while (!target::SYSCTRL.PCLKSR.getDFLLRDY())
+    //   ;
 
-    // FLL48: fine step
-    target::SYSCTRL.DFLLVAL.setFINE(10);
-    while (!target::SYSCTRL.PCLKSR.getDFLLRDY())
-      ;
+    // // FLL48: fine step
+    // target::SYSCTRL.DFLLVAL.setFINE(10);
+    // while (!target::SYSCTRL.PCLKSR.getDFLLRDY())
+    //   ;
 
-    // FLL48: multiplier
-    target::SYSCTRL.DFLLMUL.setMUL(1500);
-    while (!target::SYSCTRL.PCLKSR.getDFLLRDY())
-      ;
+    // // FLL48: multiplier
+    // target::SYSCTRL.DFLLMUL.setMUL(1500);
+    // while (!target::SYSCTRL.PCLKSR.getDFLLRDY())
+    //   ;
 
-    // FLL48: switch to closed loop mode
-    // does not work: target::SYSCTRL.DFLLCTRL.setMODE(1);
-    target::SYSCTRL.DFLLCTRL = 3 << 1;
+    // // FLL48: switch to closed loop mode
+    // // does not work: target::SYSCTRL.DFLLCTRL.setMODE(1);
+    // target::SYSCTRL.DFLLCTRL = 3 << 1;
+
+    //////////////////////////////////////////////////////////////////////////
+
+    // GEN0: clocked from GEN1 (4MHz)
+    target::GCLK.GENCTRL = 1 << 16 | 2 << 8 | 0;
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -138,8 +143,12 @@ public:
     // EIC: clocked from generator 0
     target::GCLK.CLKCTRL = 1 << 14 | 0 << 8 | 0x05;
 
-    // EIC: RF_DATA_EXTIN interrupt on both edges
-    target::EIC.CONFIG.setSENSE(RF_DATA_EXTIN, 3);
+    // EIC: RF_DATA_EXTIN interrupt on rising edge
+    target::EIC.CONFIG.setSENSE(RF_DATA_EXTIN, 1);
+
+
+    // EIC: RF_DATA_EXTIN filter enabled
+    target::EIC.CONFIG.setFILTEN(RF_DATA_EXTIN, 1);
 
     // EIC: enable
     target::EIC.CTRL.setENABLE(1);
@@ -159,48 +168,54 @@ public:
     // TC1: 32bit mode
     target::TC1.COUNT32.CTRLA.setMODE(2);
 
-    // TODO for higher clock prescale to tick on 1us
-    // TC1: prescaler: GCLK_TC/256
-    // target::TC1.COUNT32.CTRLA.setPRESCALER(0x5);
-    // target::TC1.COUNT32.CTRLA.setPRESCALER(0x1);
+    // TC1: prescale to tick on 1us
+    target::TC1.COUNT32.CTRLA.setPRESCALER(0x2);
+
+    target::TC1.COUNT32.CTRLBSET.setONESHOT(1);
+    target::TC1.COUNT32.CTRLBSET.setCMD(2); // STOP
+    target::TC1.COUNT32.CC[0] = 1000;
+    target::TC1.COUNT32.INTENSET.setMC(0, 1);
+    target::TC1.COUNT32.CC[1] = 2500;
+    target::TC1.COUNT32.INTENSET.setMC(1, 1);
 
     // TC1: enable
     target::TC1.COUNT32.CTRLA.setENABLE(1);
+
+    target::NVIC.ISER.setSETENA(1 << target::interrupts::External::TC1);
 
     //////////////////////////////////////////////////////////////////////////
 
     decoder.init(1);
 
     // EIC: RF_DATA_EXTIN interrupt enabled
-    target::EIC.INTENSET.setEXTINT(RF_DATA_EXTIN, 1);
+    target::EIC.INTENSET.setEXTINT(RF_DATA_EXTIN, 1);    
   }
 
 } app;
 
-// volatile int zzz;
+void interruptHandlerTC1() {
+  if (target::TC1.COUNT32.INTFLAG.getMC(0)) {
+    target::TC1.COUNT32.INTFLAG.setMC(0, 1);
+    app.decoder.pushBit((target::PORT.IN.getIN() >> RF_DATA_PIN) & 1);
+  }
+
+  if (target::TC1.COUNT32.INTFLAG.getMC(1)) {
+    target::TC1.COUNT32.INTFLAG.setMC(1, 1);    
+    app.decoder.restart();
+  }  
+    
+}
 
 void interruptHandlerEIC() {
   if (target::EIC.INTFLAG.getEXTINT(RF_DATA_EXTIN)) {
-
-    int rising = (target::PORT.IN.getIN() >> RF_DATA_PIN) & 1;
-    int t = target::TC1.COUNT32.COUNT;
-    if (t > 300) {
-      if (rising) {
-        target::TC1.COUNT32.COUNT = 0;
-      } else {
-        if (t < 700)
-          app.decoder.pushBit(0);
-        if (t > 1300 && t < 1700)
-          app.decoder.pushBit(1);
-      }
-    }
-
+    target::TC1.COUNT32.CTRLBSET = 2 << 6; // STOP
+    target::TC1.COUNT32.CTRLBSET = 1 << 6; // RESTART
     target::EIC.INTFLAG.setEXTINT(RF_DATA_EXTIN, 1);
   }
 }
 
 void initApplication() {
-  genericTimer::clkHz = 1E6;
+  genericTimer::clkHz = 1E6; // FIXME
   mark::init(4);
   app.init();
 }
