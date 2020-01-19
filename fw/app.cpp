@@ -200,26 +200,26 @@ public:
 
 void interruptHandlerTC1() {
   if (target::TC1.COUNT32.INTFLAG.getMC(0)) {
-    target::TC1.COUNT32.INTFLAG.setMC(0, 1);
+    target::TC1.COUNT32.INTFLAG.setMC(0, true);
     app.decoder.pushBit((target::PORT.IN.getIN() >> RF_DATA_PIN) & 1);
   }
 
   if (target::TC1.COUNT32.INTFLAG.getMC(1)) {
-    target::TC1.COUNT32.INTFLAG.setMC(1, 1);
+    target::TC1.COUNT32.INTFLAG.setMC(1, true);
     app.decoder.restart();
   }
 }
 
 void interruptHandlerEIC() {
   if (target::EIC.INTFLAG.getEXTINT(RF_DATA_EXTIN)) {
-    target::TC1.COUNT32.CTRLBSET = 2 << 6; // STOP
-    target::TC1.COUNT32.CTRLBSET = 1 << 6; // RESTART
-    target::EIC.INTFLAG.setEXTINT(RF_DATA_EXTIN, 1);
+    target::tc::COUNT32::CTRLBSET::Register workCTRLBSET;
+    target::TC1.COUNT32.CTRLBSET = workCTRLBSET.zero().setCMD(target::tc::COUNT32::CTRLBSET::CMD::STOP);
+    target::TC1.COUNT32.CTRLBSET = workCTRLBSET.zero().setCMD(target::tc::COUNT32::CTRLBSET::CMD::RETRIGGER);
+    target::EIC.INTFLAG.setEXTINT(RF_DATA_EXTIN, true);
   }
 }
 
 void initApplication() {
   genericTimer::clkHz = 1E6; // FIXME
-  mark::init(4);
   app.init();
 }
