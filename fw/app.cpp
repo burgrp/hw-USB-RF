@@ -168,23 +168,23 @@ public:
     target::PM.APBCMASK.setTC(1, true);
 
     // TC1: 32bit mode
-    target::TC1.COUNT32.CTRLA.setMODE(
-        target::tc::COUNT32::CTRLA::MODE::COUNT32);
+    target::TC1.COUNT16.CTRLA.setMODE(
+        target::tc::COUNT16::CTRLA::MODE::COUNT16);
 
     // TC1: prescale to tick on 1us
-    target::TC1.COUNT32.CTRLA.setPRESCALER(
-        target::tc::COUNT32::CTRLA::PRESCALER::DIV4);
+    target::TC1.COUNT16.CTRLA.setPRESCALER(
+        target::tc::COUNT16::CTRLA::PRESCALER::DIV4);
 
-    target::TC1.COUNT32.CTRLBSET.setONESHOT(true);
-    target::TC1.COUNT32.CTRLBSET.setCMD(
-        target::tc::COUNT32::CTRLBSET::CMD ::STOP); // STOP
-    target::TC1.COUNT32.CC[0] = 1000;
-    target::TC1.COUNT32.INTENSET.setMC(0, true);
-    target::TC1.COUNT32.CC[1] = 2500;
-    target::TC1.COUNT32.INTENSET.setMC(1, true);
+    target::TC1.COUNT16.CTRLBSET.setONESHOT(true);
+    target::TC1.COUNT16.CTRLBSET.setCMD(
+        target::tc::COUNT16::CTRLBSET::CMD ::STOP); // STOP
+    target::TC1.COUNT16.CC[0] = 1000;
+    target::TC1.COUNT16.INTENSET.setMC(0, true);
+    target::TC1.COUNT16.CC[1] = 2500;
+    target::TC1.COUNT16.INTENSET.setMC(1, true);
 
     // TC1: enable
-    target::TC1.COUNT32.CTRLA.setENABLE(true);
+    target::TC1.COUNT16.CTRLA.setENABLE(true);
 
     target::NVIC.ISER.setSETENA(1 << target::interrupts::External::TC1);
 
@@ -199,22 +199,22 @@ public:
 } app;
 
 void interruptHandlerTC1() {
-  if (target::TC1.COUNT32.INTFLAG.getMC(0)) {
-    target::TC1.COUNT32.INTFLAG.setMC(0, true);
+  if (target::TC1.COUNT16.INTFLAG.getMC(0)) {
+    target::TC1.COUNT16.INTFLAG.setMC(0, true);
     app.decoder.pushBit((target::PORT.IN.getIN() >> RF_DATA_PIN) & 1);
   }
 
-  if (target::TC1.COUNT32.INTFLAG.getMC(1)) {
-    target::TC1.COUNT32.INTFLAG.setMC(1, true);
+  if (target::TC1.COUNT16.INTFLAG.getMC(1)) {
+    target::TC1.COUNT16.INTFLAG.setMC(1, true);
     app.decoder.restart();
   }
 }
 
 void interruptHandlerEIC() {
   if (target::EIC.INTFLAG.getEXTINT(RF_DATA_EXTIN)) {
-    target::tc::COUNT32::CTRLBSET::Register workCTRLBSET;
-    target::TC1.COUNT32.CTRLBSET = workCTRLBSET.zero().setCMD(target::tc::COUNT32::CTRLBSET::CMD::STOP);
-    target::TC1.COUNT32.CTRLBSET = workCTRLBSET.zero().setCMD(target::tc::COUNT32::CTRLBSET::CMD::RETRIGGER);
+    target::tc::COUNT16::CTRLBSET::Register workCTRLBSET;
+    target::TC1.COUNT16.CTRLBSET = workCTRLBSET.zero().setCMD(target::tc::COUNT16::CTRLBSET::CMD::STOP);
+    target::TC1.COUNT16.CTRLBSET = workCTRLBSET.zero().setCMD(target::tc::COUNT16::CTRLBSET::CMD::RETRIGGER);
     target::EIC.INTFLAG.setEXTINT(RF_DATA_EXTIN, true);
   }
 }
