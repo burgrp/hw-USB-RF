@@ -1,13 +1,15 @@
 const int LED_PIN = 5;
 const int RF_DATA_PIN = 2;
+const int RF_CLK_PIN = 14;
 const int RF_DATA_EXTIN = RF_DATA_PIN;
 const int SAFE_BOOT_PIN = 8;
+const int MAIN_CLOCK_MHZ = 12;
 
 class App {
 public:
   class : public ookey::rx::Decoder {
   public:
-    void dataReceived(unsigned char *data, int len) {
+    void dataReceived(unsigned short address, unsigned char *data, int len) {
       target::PORT.OUTTGL.setOUTTGL(1 << LED_PIN);
     }
 
@@ -21,38 +23,67 @@ public:
     target::gclk::CLKCTRL::Register workClkctrl;
 
     //////////////////////////////////////////////////////////////////////////
+    // XOSC: enable external 12MHz crystal
+    //////////////////////////////////////////////////////////////////////////
 
-    // enable external crystal oscillator
     target::SYSCTRL.XOSC.setGAIN(target::sysctrl::XOSC::GAIN::_16MHZ);
     target::SYSCTRL.XOSC.setXTALEN(true);
     target::SYSCTRL.XOSC.setENABLE(true);
 
     //////////////////////////////////////////////////////////////////////////
+    // GEN0: output 12MHz
+    //////////////////////////////////////////////////////////////////////////
 
-    // GEN1: divide output to 4MHz to be suitable for 32kHz division later
-    target::GCLK.GENDIV = workGendiv.zero().setID(1).setDIV(3);
+    target::GCLK.GENCTRL = workGenctrl.zero()
+                               .setID(0)
+                               .setSRC(target::gclk::GENCTRL::SRC::XOSC)
+                               .setGENEN(true);
 
-    // GEN1: generator enabled, clocked from XOSC
+    //////////////////////////////////////////////////////////////////////////
+    // GEN1: output 32kHz
+    //////////////////////////////////////////////////////////////////////////
+
+    target::GCLK.GENDIV = workGendiv.zero().setID(1).setDIV(375);
+
     target::GCLK.GENCTRL = workGenctrl.zero()
                                .setID(1)
                                .setSRC(target::gclk::GENCTRL::SRC::XOSC)
                                .setGENEN(true);
 
-    // wait for XOSC ready
-    while (!target::SYSCTRL.PCLKSR.getXOSCRDY())
-      ;
-
+    //////////////////////////////////////////////////////////////////////////
+    // PLL96: output 54.2766MHz
     //////////////////////////////////////////////////////////////////////////
 
-    // GEN3: divide output to 32kHz
-    target::GCLK.GENDIV = workGendiv.zero().setID(3).setDIV(125);
+    target::GCLK.CLKCTRL = workClkctrl.zero()
+                               .setID(target::gclk::CLKCTRL::ID::FDPLL)
+                               .setGEN(target::gclk::CLKCTRL::GEN::GCLK1)
+                               .setCLKEN(true);
 
-    // GEN3: generator enabled, clocked from GEN1
+    target::SYSCTRL.DPLLCTRLB.setREFCLK(
+        target::sysctrl::DPLLCTRLB::REFCLK::GCLK);
+
+    target::SYSCTRL.DPLLRATIO.setLDR(1695);
+    target::SYSCTRL.DPLLRATIO.setLDRFRAC(2);
+
+    target::SYSCTRL.DPLLCTRLA.setENABLE(true);
+
+    //////////////////////////////////////////////////////////////////////////
+    // GEN4: output 27.1383MHz to external RF_CLK_PIN
+    //////////////////////////////////////////////////////////////////////////
+
+    target::GCLK.GENDIV = workGendiv.zero().setID(4).setDIV(2);
+
     target::GCLK.GENCTRL = workGenctrl.zero()
-                               .setID(3)
-                               .setSRC(target::gclk::GENCTRL::SRC::GCLKGEN1)
+                               .setID(4)
+                               .setSRC(target::gclk::GENCTRL::SRC::DPLL96M)
+                               .setOE(true)
                                .setGENEN(true);
 
+    target::PORT.PMUX[RF_CLK_PIN >> 1].setPMUXE(target::port::PMUX::PMUXE::H);
+    target::PORT.PINCFG[RF_CLK_PIN].setPMUXEN(true);
+
+    //////////////////////////////////////////////////////////////////////////
+    // FLL96: output 48MHz
     //////////////////////////////////////////////////////////////////////////
 
     // // FLL48: clocked from GEN3 (32kHz)
@@ -84,48 +115,7 @@ public:
     // target::SYSCTRL.DFLLCTRL = 3 << 1;
 
     //////////////////////////////////////////////////////////////////////////
-
-    // GEN0: clocked from GEN1 (4MHz)
-    target::GCLK.GENCTRL = workGenctrl.zero()
-                               .setID(0)
-                               .setSRC(target::gclk::GENCTRL::SRC::GCLKGEN1)
-                               .setGENEN(true);
-
-    //////////////////////////////////////////////////////////////////////////
-
-    // PLL96: clocked from GEN3 (32kHz)
-    target::GCLK.CLKCTRL = workClkctrl.zero()
-                               .setID(target::gclk::CLKCTRL::ID::FDPLL)
-                               .setGEN(target::gclk::CLKCTRL::GEN::GCLK3)
-                               .setCLKEN(true);
-
-    // PLL96: reference clock is GCLK_DPLL
-    target::SYSCTRL.DPLLCTRLB.setREFCLK(
-        target::sysctrl::DPLLCTRLB::REFCLK::GCLK);
-
-    // PLL96: output to 2*27.1383MHz, divide by 2 later in GEN4
-    target::SYSCTRL.DPLLRATIO.setLDR(1695);
-    target::SYSCTRL.DPLLRATIO.setLDRFRAC(2);
-
-    // PLL96: enable
-    target::SYSCTRL.DPLLCTRLA.setENABLE(true);
-
-    //////////////////////////////////////////////////////////////////////////
-
-    // GEN 4: divide PLL96 by two
-    target::GCLK.GENDIV = workGendiv.zero().setID(4).setDIV(2);
-
-    // GEN 4: output enabled, generator enabled, clocked from PLL96
-    target::GCLK.GENCTRL = workGenctrl.zero()
-                               .setID(4)
-                               .setSRC(target::gclk::GENCTRL::SRC::DPLL96M)
-                               .setOE(true)
-                               .setGENEN(true);
-
-    // PA14 to alt. function H (GCLK_IO_4)
-    target::PORT.PMUX[7].setPMUXE(target::port::PMUX::PMUXE::H);
-    target::PORT.PINCFG[14].setPMUXEN(true);
-
+    // GPIO
     //////////////////////////////////////////////////////////////////////////
 
     target::PM.APBBMASK.setPORT(1);
@@ -135,64 +125,60 @@ public:
     target::PORT.PINCFG[RF_DATA_PIN].setPMUXEN(true);
 
     //////////////////////////////////////////////////////////////////////////
+    // EIC
+    //////////////////////////////////////////////////////////////////////////
 
-    // EIC: clocked from generator 0
-    target::GCLK.CLKCTRL = 1 << 14 | 0 << 8 | 0x05;
     target::GCLK.CLKCTRL = workClkctrl.zero()
                                .setID(target::gclk::CLKCTRL::ID::EIC)
                                .setGEN(target::gclk::CLKCTRL::GEN::GCLK0)
                                .setCLKEN(true);
 
-    // EIC: RF_DATA_EXTIN interrupt on rising edge
     target::EIC.CONFIG.setSENSE(RF_DATA_EXTIN,
                                 target::eic::CONFIG::SENSE::RISE);
 
-    // EIC: RF_DATA_EXTIN filter enabled
     target::EIC.CONFIG.setFILTEN(RF_DATA_EXTIN, true);
 
-    // EIC: enable
     target::EIC.CTRL.setENABLE(true);
 
-    // NVIC: EIC interrupt enable
     target::NVIC.ISER.setSETENA(1 << target::interrupts::External::EIC);
 
     //////////////////////////////////////////////////////////////////////////
+    // TC1: generate interrupts 1ms and 2.5ms after rising edge on RF pin
+    //////////////////////////////////////////////////////////////////////////
 
-    // TC1 & TC2: clocked from generator 0
-      target::GCLK.CLKCTRL = workClkctrl.zero()
-                                 .setID(target::gclk::CLKCTRL::ID::TC1_TC2)
-                                 .setGEN(target::gclk::CLKCTRL::GEN::GCLK0)
-                                 .setCLKEN(true);
+    target::GCLK.CLKCTRL = workClkctrl.zero()
+                               .setID(target::gclk::CLKCTRL::ID::TC1_TC2)
+                               .setGEN(target::gclk::CLKCTRL::GEN::GCLK0)
+                               .setCLKEN(true);
 
-    // PM: power-on TC1
     target::PM.APBCMASK.setTC(1, true);
 
-    // TC1: 32bit mode
     target::TC1.COUNT16.CTRLA.setMODE(
         target::tc::COUNT16::CTRLA::MODE::COUNT16);
 
-    // TC1: prescale to tick on 1us
+    // TC1: tick at 12/8us
     target::TC1.COUNT16.CTRLA.setPRESCALER(
-        target::tc::COUNT16::CTRLA::PRESCALER::DIV4);
+        target::tc::COUNT16::CTRLA::PRESCALER::DIV8);
 
     target::TC1.COUNT16.CTRLBSET.setONESHOT(true);
     target::TC1.COUNT16.CTRLBSET.setCMD(
-        target::tc::COUNT16::CTRLBSET::CMD ::STOP); // STOP
-    target::TC1.COUNT16.CC[0] = 1000;
+        target::tc::COUNT16::CTRLBSET::CMD ::STOP);
+    target::TC1.COUNT16.CC[0] = 1000 * MAIN_CLOCK_MHZ / 8;
     target::TC1.COUNT16.INTENSET.setMC(0, true);
-    target::TC1.COUNT16.CC[1] = 2500;
+    target::TC1.COUNT16.CC[1] = 2500 * MAIN_CLOCK_MHZ / 8;
     target::TC1.COUNT16.INTENSET.setMC(1, true);
 
-    // TC1: enable
     target::TC1.COUNT16.CTRLA.setENABLE(true);
 
     target::NVIC.ISER.setSETENA(1 << target::interrupts::External::TC1);
 
     //////////////////////////////////////////////////////////////////////////
+    // initialize decoder and enable interrupt on RF data pin
+    //////////////////////////////////////////////////////////////////////////
 
     decoder.init(1);
+    //decoder.promisc = true;
 
-    // EIC: RF_DATA_EXTIN interrupt enabled
     target::EIC.INTENSET.setEXTINT(RF_DATA_EXTIN, true);
   }
 
@@ -212,14 +198,15 @@ void interruptHandlerTC1() {
 
 void interruptHandlerEIC() {
   if (target::EIC.INTFLAG.getEXTINT(RF_DATA_EXTIN)) {
-    target::tc::COUNT16::CTRLBSET::Register workCTRLBSET;
-    target::TC1.COUNT16.CTRLBSET = workCTRLBSET.zero().setCMD(target::tc::COUNT16::CTRLBSET::CMD::STOP);
-    target::TC1.COUNT16.CTRLBSET = workCTRLBSET.zero().setCMD(target::tc::COUNT16::CTRLBSET::CMD::RETRIGGER);
+    target::TC1.COUNT16.CTRLBSET.setCMD(
+        target::tc::COUNT16::CTRLBSET::CMD ::STOP);
+    target::TC1.COUNT16.CTRLBSET.setCMD(
+        target::tc::COUNT16::CTRLBSET::CMD ::RETRIGGER);
     target::EIC.INTFLAG.setEXTINT(RF_DATA_EXTIN, true);
   }
 }
 
 void initApplication() {
-  genericTimer::clkHz = 1E6; // FIXME
+  genericTimer::clkHz = MAIN_CLOCK_MHZ * 1E6;
   app.init();
 }
