@@ -12,6 +12,7 @@
 			"mark.cpp",
 			"inner.cpp",
 			"safeboot.cpp",
+			"usb.cpp",
 			"app.cpp"
 		],
 		"symbols": {

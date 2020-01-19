@@ -83,36 +83,50 @@ public:
     target::PORT.PINCFG[RF_CLK_PIN].setPMUXEN(true);
 
     //////////////////////////////////////////////////////////////////////////
-    // FLL96: output 48MHz
+    // FLL48: output 48MHz
     //////////////////////////////////////////////////////////////////////////
 
-    // // FLL48: clocked from GEN3 (32kHz)
-    // target::GCLK.CLKCTRL = 1 << 14 | 3 << 8 | 0x00;
+    target::GCLK.CLKCTRL = workClkctrl.zero()
+                               .setID(target::gclk::CLKCTRL::ID::DFLL48)
+                               .setGEN(target::gclk::CLKCTRL::GEN::GCLK1)
+                               .setCLKEN(true);
 
-    // // FLL48: enable
-    // // does not work: target::SYSCTRL.DFLLCTRL.setENABLE(1);
-    // target::SYSCTRL.DFLLCTRL = 1 << 1;
-    // while (!target::SYSCTRL.PCLKSR.getDFLLRDY())
-    //   ;
+    // clock domain sync - writes without reads, loop till synced
 
-    // // FLL48: coarse step
-    // target::SYSCTRL.DFLLVAL.setCOARSE(100);
-    // while (!target::SYSCTRL.PCLKSR.getDFLLRDY())
-    //   ;
+    {
+      target::sysctrl::DFLLCTRL::Register r;
+      target::SYSCTRL.DFLLCTRL = r.zero().setENABLE(true).setMODE(true);
+      while (!target::SYSCTRL.PCLKSR.getDFLLRDY())
+        ;
+    }
 
-    // // FLL48: fine step
-    // target::SYSCTRL.DFLLVAL.setFINE(10);
-    // while (!target::SYSCTRL.PCLKSR.getDFLLRDY())
-    //   ;
+    {
+      target::sysctrl::DFLLMUL::Register r;
+      target::SYSCTRL.DFLLMUL = r.zero().setMUL(48e6 / 32e3);
+      while (!target::SYSCTRL.PCLKSR.getDFLLRDY())
+        ;
+    }
 
-    // // FLL48: multiplier
-    // target::SYSCTRL.DFLLMUL.setMUL(1500);
-    // while (!target::SYSCTRL.PCLKSR.getDFLLRDY())
-    //   ;
+    //////////////////////////////////////////////////////////////////////////
+    // GEN5: output 48MHz
+    //////////////////////////////////////////////////////////////////////////
 
-    // // FLL48: switch to closed loop mode
-    // // does not work: target::SYSCTRL.DFLLCTRL.setMODE(1);
-    // target::SYSCTRL.DFLLCTRL = 3 << 1;
+
+    target::GCLK.GENCTRL = workGenctrl.zero()
+                               .setID(5)
+                               .setSRC(target::gclk::GENCTRL::SRC::DFLL48M)
+                               .setGENEN(true);
+
+    //                            .setOE(true);
+    // target::PORT.PMUX[7].setPMUXO(target::port::PMUX::PMUXO::H);
+    // target::PORT.PINCFG[15].setPMUXEN(true);
+
+
+    //////////////////////////////////////////////////////////////////////////
+    // USB
+    //////////////////////////////////////////////////////////////////////////
+
+    target::GCLK.CLKCTRL = workClkctrl.zero().setID(target::gclk::CLKCTRL::ID::USB).setGEN(target::gclk::CLKCTRL::GEN::GCLK5);
 
     //////////////////////////////////////////////////////////////////////////
     // GPIO
@@ -177,7 +191,7 @@ public:
     //////////////////////////////////////////////////////////////////////////
 
     decoder.init(1);
-    //decoder.promisc = true;
+    // decoder.promisc = true;
 
     target::EIC.INTENSET.setEXTINT(RF_DATA_EXTIN, true);
   }
