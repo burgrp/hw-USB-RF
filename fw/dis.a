@@ -1,0 +1,1615 @@
+
+build/build.elf:     file format elf32-littlearm
+
+
+Disassembly of section .text:
+
+00000000 <_vectors>:
+   0:	20001000 	.word	0x20001000
+   4:	0000008d 	.word	0x0000008d
+   8:	00000089 	.word	0x00000089
+   c:	00000089 	.word	0x00000089
+  10:	00000089 	.word	0x00000089
+  14:	00000089 	.word	0x00000089
+  18:	00000089 	.word	0x00000089
+  1c:	00000089 	.word	0x00000089
+  20:	00000089 	.word	0x00000089
+  24:	00000089 	.word	0x00000089
+  28:	00000089 	.word	0x00000089
+  2c:	00000089 	.word	0x00000089
+  30:	00000089 	.word	0x00000089
+  34:	00000089 	.word	0x00000089
+  38:	00000089 	.word	0x00000089
+  3c:	00000265 	.word	0x00000265
+  40:	00000089 	.word	0x00000089
+  44:	00000089 	.word	0x00000089
+  48:	00000089 	.word	0x00000089
+  4c:	00000089 	.word	0x00000089
+  50:	000004d1 	.word	0x000004d1
+  54:	00000089 	.word	0x00000089
+  58:	00000089 	.word	0x00000089
+  5c:	00000089 	.word	0x00000089
+  60:	00000089 	.word	0x00000089
+  64:	00000089 	.word	0x00000089
+  68:	00000089 	.word	0x00000089
+  6c:	00000089 	.word	0x00000089
+  70:	00000089 	.word	0x00000089
+  74:	00000359 	.word	0x00000359
+  78:	00000089 	.word	0x00000089
+  7c:	00000089 	.word	0x00000089
+  80:	00000089 	.word	0x00000089
+  84:	00000089 	.word	0x00000089
+
+00000088 <_Z18interruptHandlerACv>:
+.section .text
+.weak fatalError
+fatalError:
+b fatalError
+  88:	e7fe      	b.n	88 <_Z18interruptHandlerACv>
+	...
+
+0000008c <_Z21interruptHandlerResetv>:
+.section .text
+.global _Z21interruptHandlerResetv
+_Z21interruptHandlerResetv:
+
+/* copy data */
+ldr r4, =_data_src
+  8c:	4c10      	ldr	r4, [pc, #64]	; (d0 <__cxa_pure_virtual+0x4>)
+ldr r5, =_data_start
+  8e:	4d11      	ldr	r5, [pc, #68]	; (d4 <__cxa_pure_virtual+0x8>)
+ldr r6, =_data_end
+  90:	4e11      	ldr	r6, [pc, #68]	; (d8 <__cxa_pure_virtual+0xc>)
+.Lcopy_data_loop:
+cmp r5, r6
+  92:	42b5      	cmp	r5, r6
+beq .Lcopy_data_break
+  94:	d004      	beq.n	a0 <_Z21interruptHandlerResetv+0x14>
+ldr r7, [r4]
+  96:	6827      	ldr	r7, [r4, #0]
+str r7, [r5]
+  98:	602f      	str	r7, [r5, #0]
+add r4, #4
+  9a:	3404      	adds	r4, #4
+add r5, #4
+  9c:	3504      	adds	r5, #4
+b .Lcopy_data_loop
+  9e:	e7f8      	b.n	92 <_Z21interruptHandlerResetv+0x6>
+.Lcopy_data_break:
+
+/* init bss */
+ldr r4, =_bss_start
+  a0:	4c0e      	ldr	r4, [pc, #56]	; (dc <__cxa_pure_virtual+0x10>)
+ldr r5, =_bss_end
+  a2:	4d0f      	ldr	r5, [pc, #60]	; (e0 <__cxa_pure_virtual+0x14>)
+ldr r6, =0
+  a4:	4e0f      	ldr	r6, [pc, #60]	; (e4 <__cxa_pure_virtual+0x18>)
+.Linit_bss_loop:
+cmp r4, r5
+  a6:	42ac      	cmp	r4, r5
+beq .Linit_bss_break
+  a8:	d002      	beq.n	b0 <_Z21interruptHandlerResetv+0x24>
+str r6, [r4]
+  aa:	6026      	str	r6, [r4, #0]
+add r4, #4
+  ac:	3404      	adds	r4, #4
+b .Linit_bss_loop
+  ae:	e7fa      	b.n	a6 <_Z21interruptHandlerResetv+0x1a>
+.Linit_bss_break:
+
+/* constructors */
+ldr r4, =_init_array_start
+  b0:	4c0d      	ldr	r4, [pc, #52]	; (e8 <__cxa_pure_virtual+0x1c>)
+ldr r5, =_init_array_end
+  b2:	4d0e      	ldr	r5, [pc, #56]	; (ec <__cxa_pure_virtual+0x20>)
+.Lconstructors_loop:
+cmp r4, r5
+  b4:	42ac      	cmp	r4, r5
+beq .Lconstructors_break
+  b6:	d003      	beq.n	c0 <_Z21interruptHandlerResetv+0x34>
+ldr r6, [r4]
+  b8:	6826      	ldr	r6, [r4, #0]
+blx r6
+  ba:	47b0      	blx	r6
+add r4, #4
+  bc:	3404      	adds	r4, #4
+b .Lconstructors_loop
+  be:	e7f9      	b.n	b4 <_Z21interruptHandlerResetv+0x28>
+.Lconstructors_break:
+
+bl _Z15initApplicationv
+  c0:	f000 fa1a 	bl	4f8 <_Z15initApplicationv>
+/* aplication loop */
+.Laplication_loop:
+WFI
+  c4:	bf30      	wfi
+bl _Z11handleEventv
+  c6:	f000 f87b 	bl	1c0 <_Z11handleEventv>
+b .Laplication_loop
+  ca:	e7fb      	b.n	c4 <_Z21interruptHandlerResetv+0x38>
+
+000000cc <__cxa_pure_virtual>:
+
+.global __cxa_pure_virtual
+__cxa_pure_virtual:
+b fatalError
+  cc:	e7dc      	b.n	88 <_Z18interruptHandlerACv>
+  ce:	0000      	.short	0x0000
+ldr r4, =_data_src
+  d0:	00000994 	.word	0x00000994
+ldr r5, =_data_start
+  d4:	20000000 	.word	0x20000000
+ldr r6, =_data_end
+  d8:	20000008 	.word	0x20000008
+ldr r4, =_bss_start
+  dc:	20000008 	.word	0x20000008
+ldr r5, =_bss_end
+  e0:	2000013c 	.word	0x2000013c
+ldr r6, =0
+  e4:	00000000 	.word	0x00000000
+ldr r4, =_init_array_start
+  e8:	00000990 	.word	0x00000990
+ldr r5, =_init_array_end
+  ec:	00000994 	.word	0x00000994
+
+000000f0 <_ZN5ookey2rx7Decoder7onEventEv>:
+
+  // virtual void setTimerInterrupt(int time) = 0;
+  // virtual void setRfPinInterrupt(bool enabled) = 0;
+  virtual void dataReceived(unsigned char *data, int len) = 0;
+
+  void onEvent() {
+  f0:	b510      	push	{r4, lr}
+  f2:	0004      	movs	r4, r0
+    dataReceived(&buffer[1], buffer[0]);
+  f4:	6803      	ldr	r3, [r0, #0]
+  f6:	685b      	ldr	r3, [r3, #4]
+  f8:	7c82      	ldrb	r2, [r0, #18]
+  fa:	0001      	movs	r1, r0
+  fc:	3113      	adds	r1, #19
+  fe:	4798      	blx	r3
+    rxEventId = applicationEvents::createEventId();
+    handle(rxEventId);
+  }
+
+  void restart() {
+    dataBits = -1;
+ 100:	238e      	movs	r3, #142	; 0x8e
+ 102:	005b      	lsls	r3, r3, #1
+ 104:	2201      	movs	r2, #1
+ 106:	4252      	negs	r2, r2
+ 108:	50e2      	str	r2, [r4, r3]
+    preambleBits = 0;
+ 10a:	2300      	movs	r3, #0
+ 10c:	3222      	adds	r2, #34	; 0x22
+ 10e:	32ff      	adds	r2, #255	; 0xff
+ 110:	50a3      	str	r3, [r4, r2]
+    pendingData = false;
+ 112:	3204      	adds	r2, #4
+ 114:	54a3      	strb	r3, [r4, r2]
+  }
+ 116:	bd10      	pop	{r4, pc}
+
+00000118 <_ZN3AppUt_12dataReceivedEPhi>:
+        /**
+          Sets Port Data Output Value Toggle
+          @param value value in range 0..4294967295
+        */
+        __attribute__((always_inline)) Register& setOUTTGL(unsigned long value) volatile {
+          raw = (raw & ~(0xFFFFFFFF << 0)) | ((((value)) << 0) & (0xFFFFFFFF << 0));
+ 118:	4b02      	ldr	r3, [pc, #8]	; (124 <_ZN3AppUt_12dataReceivedEPhi+0xc>)
+ 11a:	69da      	ldr	r2, [r3, #28]
+ 11c:	2220      	movs	r2, #32
+ 11e:	61da      	str	r2, [r3, #28]
+public:
+  class : public ookey::rx::Decoder {
+  public:
+    void dataReceived(unsigned char *data, int len) {
+      target::PORT.OUTTGL.setOUTTGL(1 << LED_PIN);
+    }
+ 120:	4770      	bx	lr
+ 122:	46c0      	nop			; (mov r8, r8)
+ 124:	41004400 	.word	0x41004400
+
+00000128 <_Z41__static_initialization_and_destruction_0ii>:
+
+void initApplication() {
+  genericTimer::clkHz = 1E6; // FIXME
+  mark::init(4);
+  app.init();
+}
+ 128:	2801      	cmp	r0, #1
+ 12a:	d000      	beq.n	12e <_Z41__static_initialization_and_destruction_0ii+0x6>
+ 12c:	4770      	bx	lr
+ 12e:	4b0a      	ldr	r3, [pc, #40]	; (158 <_Z41__static_initialization_and_destruction_0ii+0x30>)
+ 130:	4299      	cmp	r1, r3
+ 132:	d1fb      	bne.n	12c <_Z41__static_initialization_and_destruction_0ii+0x4>
+class Decoder : public applicationEvents::EventHandler {
+ 134:	4b09      	ldr	r3, [pc, #36]	; (15c <_Z41__static_initialization_and_destruction_0ii+0x34>)
+ 136:	228c      	movs	r2, #140	; 0x8c
+ 138:	0052      	lsls	r2, r2, #1
+ 13a:	2114      	movs	r1, #20
+ 13c:	5099      	str	r1, [r3, r2]
+ 13e:	3204      	adds	r2, #4
+ 140:	3915      	subs	r1, #21
+ 142:	5099      	str	r1, [r3, r2]
+ 144:	2200      	movs	r2, #0
+ 146:	3122      	adds	r1, #34	; 0x22
+ 148:	31ff      	adds	r1, #255	; 0xff
+ 14a:	505a      	str	r2, [r3, r1]
+ 14c:	3104      	adds	r1, #4
+ 14e:	545a      	strb	r2, [r3, r1]
+  class : public ookey::rx::Decoder {
+ 150:	4a03      	ldr	r2, [pc, #12]	; (160 <_Z41__static_initialization_and_destruction_0ii+0x38>)
+ 152:	601a      	str	r2, [r3, #0]
+}
+ 154:	e7ea      	b.n	12c <_Z41__static_initialization_and_destruction_0ii+0x4>
+ 156:	46c0      	nop			; (mov r8, r8)
+ 158:	0000ffff 	.word	0x0000ffff
+ 15c:	20000010 	.word	0x20000010
+ 160:	00000988 	.word	0x00000988
+
+00000164 <_ZN17applicationEvents12handleEventsEv>:
+		}
+	};
+
+	int freeEventId = 1;
+
+	void handleEvents() {
+ 164:	b510      	push	{r4, lr}
+		for (EventHandler* handler = firstHandler; handler; handler = handler->nextHandler) {
+ 166:	4b09      	ldr	r3, [pc, #36]	; (18c <_ZN17applicationEvents12handleEventsEv+0x28>)
+ 168:	681c      	ldr	r4, [r3, #0]
+ 16a:	e000      	b.n	16e <_ZN17applicationEvents12handleEventsEv+0xa>
+ 16c:	68e4      	ldr	r4, [r4, #12]
+ 16e:	2c00      	cmp	r4, #0
+ 170:	d00a      	beq.n	188 <_ZN17applicationEvents12handleEventsEv+0x24>
+			while (handler->scheduled) {
+ 172:	68a3      	ldr	r3, [r4, #8]
+ 174:	2b00      	cmp	r3, #0
+ 176:	d0f9      	beq.n	16c <_ZN17applicationEvents12handleEventsEv+0x8>
+				handler->onEvent();
+ 178:	6823      	ldr	r3, [r4, #0]
+ 17a:	681b      	ldr	r3, [r3, #0]
+ 17c:	0020      	movs	r0, r4
+ 17e:	4798      	blx	r3
+				handler->scheduled--;
+ 180:	68a3      	ldr	r3, [r4, #8]
+ 182:	3b01      	subs	r3, #1
+ 184:	60a3      	str	r3, [r4, #8]
+			while (handler->scheduled) {
+ 186:	e7f4      	b.n	172 <_ZN17applicationEvents12handleEventsEv+0xe>
+			}
+		}
+	}
+ 188:	bd10      	pop	{r4, pc}
+ 18a:	46c0      	nop			; (mov r8, r8)
+ 18c:	20000008 	.word	0x20000008
+
+00000190 <_ZN17applicationEvents13createEventIdEv>:
+
+	int createEventId() {
+		return freeEventId++;
+ 190:	4b02      	ldr	r3, [pc, #8]	; (19c <_ZN17applicationEvents13createEventIdEv+0xc>)
+ 192:	6818      	ldr	r0, [r3, #0]
+ 194:	1c42      	adds	r2, r0, #1
+ 196:	601a      	str	r2, [r3, #0]
+	}
+ 198:	4770      	bx	lr
+ 19a:	46c0      	nop			; (mov r8, r8)
+ 19c:	20000004 	.word	0x20000004
+
+000001a0 <_ZN17applicationEvents8scheduleEi>:
+
+	void schedule(int eventId) {
+		for (EventHandler* handler = firstHandler; handler; handler = handler->nextHandler) {
+ 1a0:	4b06      	ldr	r3, [pc, #24]	; (1bc <_ZN17applicationEvents8scheduleEi+0x1c>)
+ 1a2:	681b      	ldr	r3, [r3, #0]
+ 1a4:	e000      	b.n	1a8 <_ZN17applicationEvents8scheduleEi+0x8>
+ 1a6:	68db      	ldr	r3, [r3, #12]
+ 1a8:	2b00      	cmp	r3, #0
+ 1aa:	d006      	beq.n	1ba <_ZN17applicationEvents8scheduleEi+0x1a>
+			if (handler->eventId == eventId) {
+ 1ac:	685a      	ldr	r2, [r3, #4]
+ 1ae:	4282      	cmp	r2, r0
+ 1b0:	d1f9      	bne.n	1a6 <_ZN17applicationEvents8scheduleEi+0x6>
+				handler->scheduled++;
+ 1b2:	689a      	ldr	r2, [r3, #8]
+ 1b4:	3201      	adds	r2, #1
+ 1b6:	609a      	str	r2, [r3, #8]
+ 1b8:	e7f5      	b.n	1a6 <_ZN17applicationEvents8scheduleEi+0x6>
+			}
+		}
+	}
+ 1ba:	4770      	bx	lr
+ 1bc:	20000008 	.word	0x20000008
+
+000001c0 <_Z11handleEventv>:
+
+}
+
+void handleEvent() {
+ 1c0:	b510      	push	{r4, lr}
+	applicationEvents::handleEvents();
+ 1c2:	f7ff ffcf 	bl	164 <_ZN17applicationEvents12handleEventsEv>
+ 1c6:	bd10      	pop	{r4, pc}
+
+000001c8 <_ZN4mark4initEi>:
+  pin = gpioPin;
+ 1c8:	4b03      	ldr	r3, [pc, #12]	; (1d8 <_ZN4mark4initEi+0x10>)
+ 1ca:	6018      	str	r0, [r3, #0]
+  target::PORT.DIRSET.setDIRSET(1 << pin);
+ 1cc:	2301      	movs	r3, #1
+ 1ce:	4083      	lsls	r3, r0
+          raw = (raw & ~(0xFFFFFFFF << 0)) | ((((value)) << 0) & (0xFFFFFFFF << 0));
+ 1d0:	4a02      	ldr	r2, [pc, #8]	; (1dc <_ZN4mark4initEi+0x14>)
+ 1d2:	6891      	ldr	r1, [r2, #8]
+ 1d4:	6093      	str	r3, [r2, #8]
+}
+ 1d6:	4770      	bx	lr
+ 1d8:	2000000c 	.word	0x2000000c
+ 1dc:	41004400 	.word	0x41004400
+
+000001e0 <_ZN4mark3nowEi>:
+void now(int length = 1) {
+ 1e0:	b082      	sub	sp, #8
+  target::PORT.OUTSET.setOUTSET(1 << pin);
+ 1e2:	4b0b      	ldr	r3, [pc, #44]	; (210 <_ZN4mark3nowEi+0x30>)
+ 1e4:	681b      	ldr	r3, [r3, #0]
+ 1e6:	2201      	movs	r2, #1
+ 1e8:	409a      	lsls	r2, r3
+          raw = (raw & ~(0xFFFFFFFF << 0)) | ((((value)) << 0) & (0xFFFFFFFF << 0));
+ 1ea:	4b0a      	ldr	r3, [pc, #40]	; (214 <_ZN4mark3nowEi+0x34>)
+ 1ec:	6999      	ldr	r1, [r3, #24]
+ 1ee:	619a      	str	r2, [r3, #24]
+  int wait = length * 8;
+ 1f0:	00c0      	lsls	r0, r0, #3
+  for (volatile int w = 0; w < wait; w++)
+ 1f2:	2300      	movs	r3, #0
+ 1f4:	9301      	str	r3, [sp, #4]
+ 1f6:	9b01      	ldr	r3, [sp, #4]
+ 1f8:	4283      	cmp	r3, r0
+ 1fa:	da03      	bge.n	204 <_ZN4mark3nowEi+0x24>
+ 1fc:	9b01      	ldr	r3, [sp, #4]
+ 1fe:	3301      	adds	r3, #1
+ 200:	9301      	str	r3, [sp, #4]
+ 202:	e7f8      	b.n	1f6 <_ZN4mark3nowEi+0x16>
+          raw = (raw & ~(0xFFFFFFFF << 0)) | ((((value)) << 0) & (0xFFFFFFFF << 0));
+ 204:	4b03      	ldr	r3, [pc, #12]	; (214 <_ZN4mark3nowEi+0x34>)
+ 206:	6959      	ldr	r1, [r3, #20]
+ 208:	615a      	str	r2, [r3, #20]
+}
+ 20a:	b002      	add	sp, #8
+ 20c:	4770      	bx	lr
+ 20e:	46c0      	nop			; (mov r8, r8)
+ 210:	2000000c 	.word	0x2000000c
+ 214:	41004400 	.word	0x41004400
+
+00000218 <_ZN12genericTimer12initHardwareEv>:
+namespace genericTimer {
+
+	int clkHz = 8E6;
+
+	void initHardware() {
+ 218:	b510      	push	{r4, lr}
+		target::SYSTICK.RVR.setRELOAD(clkHz / 100L);
+ 21a:	4b10      	ldr	r3, [pc, #64]	; (25c <_ZN12genericTimer12initHardwareEv+0x44>)
+ 21c:	6818      	ldr	r0, [r3, #0]
+ 21e:	2164      	movs	r1, #100	; 0x64
+ 220:	f000 fac2 	bl	7a8 <__divsi3>
+        /**
+          Sets Value to auto reload SysTick after reaching zero
+          @param value value in range 0..16777215
+        */
+        __attribute__((always_inline)) Register& setRELOAD(unsigned long value) volatile {
+          raw = (raw & ~(0xFFFFFF << 0)) | ((((value)) << 0) & (0xFFFFFF << 0));
+ 224:	4b0e      	ldr	r3, [pc, #56]	; (260 <_ZN12genericTimer12initHardwareEv+0x48>)
+ 226:	685a      	ldr	r2, [r3, #4]
+ 228:	0e12      	lsrs	r2, r2, #24
+ 22a:	0612      	lsls	r2, r2, #24
+ 22c:	0200      	lsls	r0, r0, #8
+ 22e:	0a00      	lsrs	r0, r0, #8
+ 230:	4310      	orrs	r0, r2
+ 232:	6058      	str	r0, [r3, #4]
+        /**
+          Sets Current value
+          @param value value in range 0..16777215
+        */
+        __attribute__((always_inline)) Register& setCURRENT(unsigned long value) volatile {
+          raw = (raw & ~(0xFFFFFF << 0)) | ((((value)) << 0) & (0xFFFFFF << 0));
+ 234:	689a      	ldr	r2, [r3, #8]
+ 236:	0e12      	lsrs	r2, r2, #24
+ 238:	0612      	lsls	r2, r2, #24
+ 23a:	609a      	str	r2, [r3, #8]
+          raw = (raw & ~(0x1 << 1)) | (((static_cast<unsigned long>(value)) << 1) & (0x1 << 1));
+ 23c:	681a      	ldr	r2, [r3, #0]
+ 23e:	2102      	movs	r1, #2
+ 240:	438a      	bics	r2, r1
+ 242:	430a      	orrs	r2, r1
+ 244:	601a      	str	r2, [r3, #0]
+          raw = (raw & ~(0x1 << 2)) | (((static_cast<unsigned long>(value)) << 2) & (0x1 << 2));
+ 246:	681a      	ldr	r2, [r3, #0]
+ 248:	3102      	adds	r1, #2
+ 24a:	438a      	bics	r2, r1
+ 24c:	430a      	orrs	r2, r1
+ 24e:	601a      	str	r2, [r3, #0]
+          raw = (raw & ~(0x1 << 0)) | (((static_cast<unsigned long>(value)) << 0) & (0x1 << 0));
+ 250:	681a      	ldr	r2, [r3, #0]
+ 252:	3903      	subs	r1, #3
+ 254:	438a      	bics	r2, r1
+ 256:	430a      	orrs	r2, r1
+ 258:	601a      	str	r2, [r3, #0]
+		target::SYSTICK.CVR.setCURRENT(0);
+		target::SYSTICK.CSR.setTICKINT(target::systick::CSR::TICKINT::DISABLE_SYSTICK_EXCEPTION);
+		target::SYSTICK.CSR.setCLKSOURCE(target::systick::CSR::CLKSOURCE::CPU_CLOCK);
+		target::SYSTICK.CSR.setENABLE(target::systick::CSR::ENABLE::ENABLED);
+	}
+ 25a:	bd10      	pop	{r4, pc}
+ 25c:	20000000 	.word	0x20000000
+ 260:	e000e010 	.word	0xe000e010
+
+00000264 <_Z23interruptHandlerSysTickv>:
+
+}
+
+void interruptHandlerSysTick() {
+ 264:	b510      	push	{r4, lr}
+	applicationEvents::schedule(genericTimer::eventId);
+ 266:	2000      	movs	r0, #0
+ 268:	f7ff ff9a 	bl	1a0 <_ZN17applicationEvents8scheduleEi>
+}
+ 26c:	bd10      	pop	{r4, pc}
+	...
+
+00000270 <_ZN6atsamd8safeboot4initEibi>:
+{
+namespace safeboot
+{
+
+void init(int bootPin, bool logic, int ledPin = -1)
+{
+ 270:	b570      	push	{r4, r5, r6, lr}
+ 272:	b082      	sub	sp, #8
+        /**
+          Sets PORT APB Clock Enable
+          @param value boolean value
+        */
+        __attribute__((always_inline)) Register& setPORT(bool value) volatile {
+          raw = (raw & ~(0x1 << 3)) | ((((value)) << 3) & (0x1 << 3));
+ 274:	4c34      	ldr	r4, [pc, #208]	; (348 <_ZN6atsamd8safeboot4initEibi+0xd8>)
+ 276:	69e3      	ldr	r3, [r4, #28]
+ 278:	2508      	movs	r5, #8
+ 27a:	43ab      	bics	r3, r5
+ 27c:	432b      	orrs	r3, r5
+ 27e:	61e3      	str	r3, [r4, #28]
+    target::PM.APBBMASK.setPORT(1);
+
+    target::PORT.DIRCLR.setDIRCLR(1 << bootPin);
+ 280:	2401      	movs	r4, #1
+ 282:	4084      	lsls	r4, r0
+          raw = (raw & ~(0xFFFFFFFF << 0)) | ((((value)) << 0) & (0xFFFFFFFF << 0));
+ 284:	4b31      	ldr	r3, [pc, #196]	; (34c <_ZN6atsamd8safeboot4initEibi+0xdc>)
+ 286:	685d      	ldr	r5, [r3, #4]
+ 288:	605c      	str	r4, [r3, #4]
+    if (logic)
+ 28a:	2900      	cmp	r1, #0
+ 28c:	d02c      	beq.n	2e8 <_ZN6atsamd8safeboot4initEibi+0x78>
+          raw = (raw & ~(0xFFFFFFFF << 0)) | ((((value)) << 0) & (0xFFFFFFFF << 0));
+ 28e:	695d      	ldr	r5, [r3, #20]
+ 290:	615c      	str	r4, [r3, #20]
+        /**
+          Sets Pull Enable
+          @param value boolean value
+        */
+        __attribute__((always_inline)) Register& setPULLEN(bool value) volatile {
+          raw = (raw & ~(0x1 << 2)) | ((((value)) << 2) & (0x1 << 2));
+ 292:	4d2e      	ldr	r5, [pc, #184]	; (34c <_ZN6atsamd8safeboot4initEibi+0xdc>)
+ 294:	182d      	adds	r5, r5, r0
+ 296:	3540      	adds	r5, #64	; 0x40
+ 298:	782b      	ldrb	r3, [r5, #0]
+ 29a:	b25b      	sxtb	r3, r3
+ 29c:	2604      	movs	r6, #4
+ 29e:	43b3      	bics	r3, r6
+ 2a0:	4333      	orrs	r3, r6
+ 2a2:	b2db      	uxtb	r3, r3
+ 2a4:	702b      	strb	r3, [r5, #0]
+          raw = (raw & ~(0x1 << 1)) | ((((value)) << 1) & (0x1 << 1));
+ 2a6:	782b      	ldrb	r3, [r5, #0]
+ 2a8:	b25b      	sxtb	r3, r3
+ 2aa:	2602      	movs	r6, #2
+ 2ac:	43b3      	bics	r3, r6
+ 2ae:	4333      	orrs	r3, r6
+ 2b0:	b2db      	uxtb	r3, r3
+ 2b2:	702b      	strb	r3, [r5, #0]
+        target::PORT.OUTSET.setOUTSET(1 << bootPin);
+    }
+    target::PORT.PINCFG[bootPin].setPULLEN(1);
+    target::PORT.PINCFG[bootPin].setINEN(1);
+
+    if (ledPin != -1)
+ 2b4:	1c53      	adds	r3, r2, #1
+ 2b6:	d006      	beq.n	2c6 <_ZN6atsamd8safeboot4initEibi+0x56>
+    {
+        target::PORT.DIRSET.setDIRSET(1 << ledPin);
+ 2b8:	2501      	movs	r5, #1
+ 2ba:	4095      	lsls	r5, r2
+          raw = (raw & ~(0xFFFFFFFF << 0)) | ((((value)) << 0) & (0xFFFFFFFF << 0));
+ 2bc:	4b23      	ldr	r3, [pc, #140]	; (34c <_ZN6atsamd8safeboot4initEibi+0xdc>)
+ 2be:	689e      	ldr	r6, [r3, #8]
+ 2c0:	609d      	str	r5, [r3, #8]
+          raw = (raw & ~(0xFFFFFFFF << 0)) | ((((value)) << 0) & (0xFFFFFFFF << 0));
+ 2c2:	699e      	ldr	r6, [r3, #24]
+ 2c4:	619d      	str	r5, [r3, #24]
+        target::PORT.OUTSET.setOUTSET(1 << ledPin);
+    }
+
+    for (volatile int w = 0; w < 10000; w++)
+ 2c6:	2300      	movs	r3, #0
+ 2c8:	9300      	str	r3, [sp, #0]
+ 2ca:	9d00      	ldr	r5, [sp, #0]
+ 2cc:	4b20      	ldr	r3, [pc, #128]	; (350 <_ZN6atsamd8safeboot4initEibi+0xe0>)
+ 2ce:	429d      	cmp	r5, r3
+ 2d0:	dc1f      	bgt.n	312 <_ZN6atsamd8safeboot4initEibi+0xa2>
+          return ((raw & (0xFFFFFFFF << 0)) >> 0);
+ 2d2:	4b1e      	ldr	r3, [pc, #120]	; (34c <_ZN6atsamd8safeboot4initEibi+0xdc>)
+ 2d4:	6a1d      	ldr	r5, [r3, #32]
+    {
+        if (((target::PORT.IN.getIN() >> bootPin) & 1) == logic)
+ 2d6:	40c5      	lsrs	r5, r0
+ 2d8:	2301      	movs	r3, #1
+ 2da:	402b      	ands	r3, r5
+ 2dc:	428b      	cmp	r3, r1
+ 2de:	d007      	beq.n	2f0 <_ZN6atsamd8safeboot4initEibi+0x80>
+    for (volatile int w = 0; w < 10000; w++)
+ 2e0:	9b00      	ldr	r3, [sp, #0]
+ 2e2:	3301      	adds	r3, #1
+ 2e4:	9300      	str	r3, [sp, #0]
+ 2e6:	e7f0      	b.n	2ca <_ZN6atsamd8safeboot4initEibi+0x5a>
+          raw = (raw & ~(0xFFFFFFFF << 0)) | ((((value)) << 0) & (0xFFFFFFFF << 0));
+ 2e8:	4b18      	ldr	r3, [pc, #96]	; (34c <_ZN6atsamd8safeboot4initEibi+0xdc>)
+ 2ea:	699d      	ldr	r5, [r3, #24]
+ 2ec:	619c      	str	r4, [r3, #24]
+ 2ee:	e7d0      	b.n	292 <_ZN6atsamd8safeboot4initEibi+0x22>
+        {
+            for (;;)
+            {
+                if (ledPin != -1)
+ 2f0:	1c53      	adds	r3, r2, #1
+ 2f2:	d0fd      	beq.n	2f0 <_ZN6atsamd8safeboot4initEibi+0x80>
+                {
+                    target::PORT.OUTTGL.setOUTTGL(1 << ledPin);
+ 2f4:	2301      	movs	r3, #1
+ 2f6:	4093      	lsls	r3, r2
+          raw = (raw & ~(0xFFFFFFFF << 0)) | ((((value)) << 0) & (0xFFFFFFFF << 0));
+ 2f8:	4914      	ldr	r1, [pc, #80]	; (34c <_ZN6atsamd8safeboot4initEibi+0xdc>)
+ 2fa:	69c8      	ldr	r0, [r1, #28]
+ 2fc:	61cb      	str	r3, [r1, #28]
+                    for (volatile int w = 0; w < 5000; w++);
+ 2fe:	2300      	movs	r3, #0
+ 300:	9301      	str	r3, [sp, #4]
+ 302:	9901      	ldr	r1, [sp, #4]
+ 304:	4b13      	ldr	r3, [pc, #76]	; (354 <_ZN6atsamd8safeboot4initEibi+0xe4>)
+ 306:	4299      	cmp	r1, r3
+ 308:	dcf2      	bgt.n	2f0 <_ZN6atsamd8safeboot4initEibi+0x80>
+ 30a:	9b01      	ldr	r3, [sp, #4]
+ 30c:	3301      	adds	r3, #1
+ 30e:	9301      	str	r3, [sp, #4]
+ 310:	e7f7      	b.n	302 <_ZN6atsamd8safeboot4initEibi+0x92>
+                }
+            }
+        }
+    }
+
+    if (ledPin != -1)
+ 312:	1c53      	adds	r3, r2, #1
+ 314:	d004      	beq.n	320 <_ZN6atsamd8safeboot4initEibi+0xb0>
+    {
+        target::PORT.OUTCLR.setOUTCLR(1 << ledPin);
+ 316:	2301      	movs	r3, #1
+ 318:	4093      	lsls	r3, r2
+          raw = (raw & ~(0xFFFFFFFF << 0)) | ((((value)) << 0) & (0xFFFFFFFF << 0));
+ 31a:	4a0c      	ldr	r2, [pc, #48]	; (34c <_ZN6atsamd8safeboot4initEibi+0xdc>)
+ 31c:	6951      	ldr	r1, [r2, #20]
+ 31e:	6153      	str	r3, [r2, #20]
+          raw = (raw & ~(0x1 << 2)) | ((((value)) << 2) & (0x1 << 2));
+ 320:	4a0a      	ldr	r2, [pc, #40]	; (34c <_ZN6atsamd8safeboot4initEibi+0xdc>)
+ 322:	1810      	adds	r0, r2, r0
+ 324:	3040      	adds	r0, #64	; 0x40
+ 326:	7803      	ldrb	r3, [r0, #0]
+ 328:	b25b      	sxtb	r3, r3
+ 32a:	2104      	movs	r1, #4
+ 32c:	438b      	bics	r3, r1
+ 32e:	b2db      	uxtb	r3, r3
+ 330:	7003      	strb	r3, [r0, #0]
+          raw = (raw & ~(0x1 << 1)) | ((((value)) << 1) & (0x1 << 1));
+ 332:	7803      	ldrb	r3, [r0, #0]
+ 334:	b25b      	sxtb	r3, r3
+ 336:	3902      	subs	r1, #2
+ 338:	438b      	bics	r3, r1
+ 33a:	b2db      	uxtb	r3, r3
+ 33c:	7003      	strb	r3, [r0, #0]
+          raw = (raw & ~(0xFFFFFFFF << 0)) | ((((value)) << 0) & (0xFFFFFFFF << 0));
+ 33e:	6953      	ldr	r3, [r2, #20]
+ 340:	6154      	str	r4, [r2, #20]
+    }
+
+    target::PORT.PINCFG[bootPin].setPULLEN(0);
+    target::PORT.PINCFG[bootPin].setINEN(0);
+    target::PORT.OUTCLR.setOUTCLR(1 << bootPin);
+}
+ 342:	b002      	add	sp, #8
+ 344:	bd70      	pop	{r4, r5, r6, pc}
+ 346:	46c0      	nop			; (mov r8, r8)
+ 348:	40000400 	.word	0x40000400
+ 34c:	41004400 	.word	0x41004400
+ 350:	0000270f 	.word	0x0000270f
+ 354:	00001387 	.word	0x00001387
+
+00000358 <_Z19interruptHandlerTC1v>:
+void interruptHandlerTC1() {
+ 358:	b510      	push	{r4, lr}
+            Gets Match or Capture Channel 0
+            @param index in range 0..1
+            @return boolean value
+          */
+          __attribute__((always_inline)) bool getMC(int index) volatile {
+            return ((raw & (0x1 << (4 + 1 * (index - 0)))) >> (4 + 1 * (index - 0)));
+ 35a:	4b5a      	ldr	r3, [pc, #360]	; (4c4 <_Z19interruptHandlerTC1v+0x16c>)
+ 35c:	7b9b      	ldrb	r3, [r3, #14]
+  if (target::TC1.COUNT32.INTFLAG.getMC(0)) {
+ 35e:	06db      	lsls	r3, r3, #27
+ 360:	d418      	bmi.n	394 <_Z19interruptHandlerTC1v+0x3c>
+ 362:	4b58      	ldr	r3, [pc, #352]	; (4c4 <_Z19interruptHandlerTC1v+0x16c>)
+ 364:	7b9b      	ldrb	r3, [r3, #14]
+  if (target::TC1.COUNT32.INTFLAG.getMC(1)) {
+ 366:	069b      	lsls	r3, r3, #26
+ 368:	d513      	bpl.n	392 <_Z19interruptHandlerTC1v+0x3a>
+            Sets Match or Capture Channel 0
+            @param index in range 0..1
+            @param value boolean value
+          */
+          __attribute__((always_inline)) Register& setMC(int index, bool value) volatile {
+            raw = (raw & ~(0x1 << (4 + 1 * (index - 0)))) | ((((value)) << (4 + 1 * (index - 0))) & (0x1 << (4 + 1 * (index - 0))));
+ 36a:	4a56      	ldr	r2, [pc, #344]	; (4c4 <_Z19interruptHandlerTC1v+0x16c>)
+ 36c:	7b93      	ldrb	r3, [r2, #14]
+ 36e:	b25b      	sxtb	r3, r3
+ 370:	2120      	movs	r1, #32
+ 372:	438b      	bics	r3, r1
+ 374:	430b      	orrs	r3, r1
+ 376:	b2db      	uxtb	r3, r3
+ 378:	7393      	strb	r3, [r2, #14]
+    dataBits = -1;
+ 37a:	4b53      	ldr	r3, [pc, #332]	; (4c8 <_Z19interruptHandlerTC1v+0x170>)
+ 37c:	228e      	movs	r2, #142	; 0x8e
+ 37e:	0052      	lsls	r2, r2, #1
+ 380:	2101      	movs	r1, #1
+ 382:	4249      	negs	r1, r1
+ 384:	5099      	str	r1, [r3, r2]
+    preambleBits = 0;
+ 386:	2200      	movs	r2, #0
+ 388:	3122      	adds	r1, #34	; 0x22
+ 38a:	31ff      	adds	r1, #255	; 0xff
+ 38c:	505a      	str	r2, [r3, r1]
+    pendingData = false;
+ 38e:	3104      	adds	r1, #4
+ 390:	545a      	strb	r2, [r3, r1]
+}
+ 392:	bd10      	pop	{r4, pc}
+ 394:	4a4b      	ldr	r2, [pc, #300]	; (4c4 <_Z19interruptHandlerTC1v+0x16c>)
+ 396:	7b93      	ldrb	r3, [r2, #14]
+ 398:	b25b      	sxtb	r3, r3
+ 39a:	2110      	movs	r1, #16
+ 39c:	438b      	bics	r3, r1
+ 39e:	430b      	orrs	r3, r1
+ 3a0:	b2db      	uxtb	r3, r3
+ 3a2:	7393      	strb	r3, [r2, #14]
+          return ((raw & (0xFFFFFFFF << 0)) >> 0);
+ 3a4:	4b49      	ldr	r3, [pc, #292]	; (4cc <_Z19interruptHandlerTC1v+0x174>)
+ 3a6:	6a1b      	ldr	r3, [r3, #32]
+    app.decoder.pushBit((target::PORT.IN.getIN() >> RF_DATA_PIN) & 1);
+ 3a8:	089b      	lsrs	r3, r3, #2
+ 3aa:	2201      	movs	r2, #1
+ 3ac:	4013      	ands	r3, r2
+  }
+
+  void pushBit(int bit) {
+
+    if (dataBits < 0) {
+ 3ae:	4946      	ldr	r1, [pc, #280]	; (4c8 <_Z19interruptHandlerTC1v+0x170>)
+ 3b0:	321c      	adds	r2, #28
+ 3b2:	32ff      	adds	r2, #255	; 0xff
+ 3b4:	588a      	ldr	r2, [r1, r2]
+ 3b6:	2a00      	cmp	r2, #0
+ 3b8:	db25      	blt.n	406 <_Z19interruptHandlerTC1v+0xae>
+          restart();
+        }
+      }
+
+    } else {
+      int thisBit = dataBits++;
+ 3ba:	1c54      	adds	r4, r2, #1
+ 3bc:	4842      	ldr	r0, [pc, #264]	; (4c8 <_Z19interruptHandlerTC1v+0x170>)
+ 3be:	218e      	movs	r1, #142	; 0x8e
+ 3c0:	0049      	lsls	r1, r1, #1
+ 3c2:	5044      	str	r4, [r0, r1]
+
+      int byteIndex = thisBit >> 3;
+ 3c4:	10d0      	asrs	r0, r2, #3
+      int bitIndex = thisBit & 7;
+ 3c6:	3916      	subs	r1, #22
+ 3c8:	39ff      	subs	r1, #255	; 0xff
+ 3ca:	400a      	ands	r2, r1
+
+      if (byteIndex < sizeof(buffer)) {
+ 3cc:	31fd      	adds	r1, #253	; 0xfd
+ 3ce:	4288      	cmp	r0, r1
+ 3d0:	d86b      	bhi.n	4aa <_Z19interruptHandlerTC1v+0x152>
+
+        if (!bitIndex) {
+ 3d2:	2a00      	cmp	r2, #0
+ 3d4:	d140      	bne.n	458 <_Z19interruptHandlerTC1v+0x100>
+          buffer[byteIndex] = bit;
+ 3d6:	493c      	ldr	r1, [pc, #240]	; (4c8 <_Z19interruptHandlerTC1v+0x170>)
+ 3d8:	1809      	adds	r1, r1, r0
+ 3da:	748b      	strb	r3, [r1, #18]
+        } else {
+          buffer[byteIndex] |= bit << bitIndex;
+        }
+
+        // complete byte
+        if (bitIndex == 7) {
+ 3dc:	2a07      	cmp	r2, #7
+ 3de:	d1c0      	bne.n	362 <_Z19interruptHandlerTC1v+0xa>
+
+          // are we complete incl. crc?
+          int len = buffer[2];
+ 3e0:	4b39      	ldr	r3, [pc, #228]	; (4c8 <_Z19interruptHandlerTC1v+0x170>)
+ 3e2:	7d19      	ldrb	r1, [r3, #20]
+          if (byteIndex > 2 && 2 + 1 + len + 2 == byteIndex + 1) {
+ 3e4:	2802      	cmp	r0, #2
+ 3e6:	ddbc      	ble.n	362 <_Z19interruptHandlerTC1v+0xa>
+ 3e8:	1d4b      	adds	r3, r1, #5
+ 3ea:	3001      	adds	r0, #1
+ 3ec:	4283      	cmp	r3, r0
+ 3ee:	d1b8      	bne.n	362 <_Z19interruptHandlerTC1v+0xa>
+            int myCrc = 0x55;
+            for (int c = 0; c < len; c++) {
+ 3f0:	2300      	movs	r3, #0
+            int myCrc = 0x55;
+ 3f2:	2055      	movs	r0, #85	; 0x55
+            for (int c = 0; c < len; c++) {
+ 3f4:	4299      	cmp	r1, r3
+ 3f6:	dd36      	ble.n	466 <_Z19interruptHandlerTC1v+0x10e>
+              myCrc += buffer[c + 3];
+ 3f8:	1cdc      	adds	r4, r3, #3
+ 3fa:	4a33      	ldr	r2, [pc, #204]	; (4c8 <_Z19interruptHandlerTC1v+0x170>)
+ 3fc:	1912      	adds	r2, r2, r4
+ 3fe:	7c92      	ldrb	r2, [r2, #18]
+ 400:	1880      	adds	r0, r0, r2
+            for (int c = 0; c < len; c++) {
+ 402:	3301      	adds	r3, #1
+ 404:	e7f6      	b.n	3f4 <_Z19interruptHandlerTC1v+0x9c>
+      if (bit) {
+ 406:	2b00      	cmp	r3, #0
+ 408:	d113      	bne.n	432 <_Z19interruptHandlerTC1v+0xda>
+        if (preambleBits > MIN_PREAMBLE_BITS && !pendingData) {
+ 40a:	4b2f      	ldr	r3, [pc, #188]	; (4c8 <_Z19interruptHandlerTC1v+0x170>)
+ 40c:	2290      	movs	r2, #144	; 0x90
+ 40e:	0052      	lsls	r2, r2, #1
+ 410:	589a      	ldr	r2, [r3, r2]
+ 412:	218c      	movs	r1, #140	; 0x8c
+ 414:	0049      	lsls	r1, r1, #1
+ 416:	585b      	ldr	r3, [r3, r1]
+ 418:	429a      	cmp	r2, r3
+ 41a:	dd10      	ble.n	43e <_Z19interruptHandlerTC1v+0xe6>
+ 41c:	4a2a      	ldr	r2, [pc, #168]	; (4c8 <_Z19interruptHandlerTC1v+0x170>)
+ 41e:	2392      	movs	r3, #146	; 0x92
+ 420:	005b      	lsls	r3, r3, #1
+ 422:	5cd3      	ldrb	r3, [r2, r3]
+ 424:	2b00      	cmp	r3, #0
+ 426:	d10a      	bne.n	43e <_Z19interruptHandlerTC1v+0xe6>
+          dataBits = 0;          
+ 428:	331d      	adds	r3, #29
+ 42a:	33ff      	adds	r3, #255	; 0xff
+ 42c:	2100      	movs	r1, #0
+ 42e:	50d1      	str	r1, [r2, r3]
+ 430:	e797      	b.n	362 <_Z19interruptHandlerTC1v+0xa>
+        preambleBits++;
+ 432:	2290      	movs	r2, #144	; 0x90
+ 434:	0052      	lsls	r2, r2, #1
+ 436:	588b      	ldr	r3, [r1, r2]
+ 438:	3301      	adds	r3, #1
+ 43a:	508b      	str	r3, [r1, r2]
+ 43c:	e791      	b.n	362 <_Z19interruptHandlerTC1v+0xa>
+    dataBits = -1;
+ 43e:	4b22      	ldr	r3, [pc, #136]	; (4c8 <_Z19interruptHandlerTC1v+0x170>)
+ 440:	228e      	movs	r2, #142	; 0x8e
+ 442:	0052      	lsls	r2, r2, #1
+ 444:	2101      	movs	r1, #1
+ 446:	4249      	negs	r1, r1
+ 448:	5099      	str	r1, [r3, r2]
+    preambleBits = 0;
+ 44a:	2200      	movs	r2, #0
+ 44c:	3122      	adds	r1, #34	; 0x22
+ 44e:	31ff      	adds	r1, #255	; 0xff
+ 450:	505a      	str	r2, [r3, r1]
+    pendingData = false;
+ 452:	3104      	adds	r1, #4
+ 454:	545a      	strb	r2, [r3, r1]
+ 456:	e784      	b.n	362 <_Z19interruptHandlerTC1v+0xa>
+          buffer[byteIndex] |= bit << bitIndex;
+ 458:	4093      	lsls	r3, r2
+ 45a:	491b      	ldr	r1, [pc, #108]	; (4c8 <_Z19interruptHandlerTC1v+0x170>)
+ 45c:	1809      	adds	r1, r1, r0
+ 45e:	7c8c      	ldrb	r4, [r1, #18]
+ 460:	4323      	orrs	r3, r4
+ 462:	748b      	strb	r3, [r1, #18]
+ 464:	e7ba      	b.n	3dc <_Z19interruptHandlerTC1v+0x84>
+            }
+            int theirCrc = buffer[3 + len] | (buffer[3 + len + 1] << 8);
+ 466:	1cca      	adds	r2, r1, #3
+ 468:	4b17      	ldr	r3, [pc, #92]	; (4c8 <_Z19interruptHandlerTC1v+0x170>)
+ 46a:	189a      	adds	r2, r3, r2
+ 46c:	7c92      	ldrb	r2, [r2, #18]
+ 46e:	3104      	adds	r1, #4
+ 470:	1859      	adds	r1, r3, r1
+ 472:	7c8b      	ldrb	r3, [r1, #18]
+ 474:	021b      	lsls	r3, r3, #8
+ 476:	4313      	orrs	r3, r2
+            if (theirCrc == myCrc) {
+ 478:	4298      	cmp	r0, r3
+ 47a:	d00c      	beq.n	496 <_Z19interruptHandlerTC1v+0x13e>
+    dataBits = -1;
+ 47c:	4b12      	ldr	r3, [pc, #72]	; (4c8 <_Z19interruptHandlerTC1v+0x170>)
+ 47e:	228e      	movs	r2, #142	; 0x8e
+ 480:	0052      	lsls	r2, r2, #1
+ 482:	2101      	movs	r1, #1
+ 484:	4249      	negs	r1, r1
+ 486:	5099      	str	r1, [r3, r2]
+    preambleBits = 0;
+ 488:	2200      	movs	r2, #0
+ 48a:	3122      	adds	r1, #34	; 0x22
+ 48c:	31ff      	adds	r1, #255	; 0xff
+ 48e:	505a      	str	r2, [r3, r1]
+    pendingData = false;
+ 490:	3104      	adds	r1, #4
+ 492:	545a      	strb	r2, [r3, r1]
+ 494:	e765      	b.n	362 <_Z19interruptHandlerTC1v+0xa>
+              pendingData = true;
+ 496:	4b0c      	ldr	r3, [pc, #48]	; (4c8 <_Z19interruptHandlerTC1v+0x170>)
+ 498:	2292      	movs	r2, #146	; 0x92
+ 49a:	0052      	lsls	r2, r2, #1
+ 49c:	2101      	movs	r1, #1
+ 49e:	5499      	strb	r1, [r3, r2]
+              applicationEvents::schedule(rxEventId);
+ 4a0:	3204      	adds	r2, #4
+ 4a2:	5898      	ldr	r0, [r3, r2]
+ 4a4:	f7ff fe7c 	bl	1a0 <_ZN17applicationEvents8scheduleEi>
+ 4a8:	e75b      	b.n	362 <_Z19interruptHandlerTC1v+0xa>
+    dataBits = -1;
+ 4aa:	4b07      	ldr	r3, [pc, #28]	; (4c8 <_Z19interruptHandlerTC1v+0x170>)
+ 4ac:	228e      	movs	r2, #142	; 0x8e
+ 4ae:	0052      	lsls	r2, r2, #1
+ 4b0:	2101      	movs	r1, #1
+ 4b2:	4249      	negs	r1, r1
+ 4b4:	5099      	str	r1, [r3, r2]
+    preambleBits = 0;
+ 4b6:	2200      	movs	r2, #0
+ 4b8:	3122      	adds	r1, #34	; 0x22
+ 4ba:	31ff      	adds	r1, #255	; 0xff
+ 4bc:	505a      	str	r2, [r3, r1]
+    pendingData = false;
+ 4be:	3104      	adds	r1, #4
+ 4c0:	545a      	strb	r2, [r3, r1]
+ 4c2:	e74e      	b.n	362 <_Z19interruptHandlerTC1v+0xa>
+ 4c4:	42001800 	.word	0x42001800
+ 4c8:	20000010 	.word	0x20000010
+ 4cc:	41004400 	.word	0x41004400
+
+000004d0 <_Z19interruptHandlerEICv>:
+          Gets External Interrupt 0
+          @param index in range 0..7
+          @return boolean value
+        */
+        __attribute__((always_inline)) bool getEXTINT(int index) volatile {
+          return ((raw & (0x1 << (0 + 1 * (index - 0)))) >> (0 + 1 * (index - 0)));
+ 4d0:	4b07      	ldr	r3, [pc, #28]	; (4f0 <_Z19interruptHandlerEICv+0x20>)
+ 4d2:	691b      	ldr	r3, [r3, #16]
+  if (target::EIC.INTFLAG.getEXTINT(RF_DATA_EXTIN)) {
+ 4d4:	075b      	lsls	r3, r3, #29
+ 4d6:	d50a      	bpl.n	4ee <_Z19interruptHandlerEICv+0x1e>
+            raw = value;
+ 4d8:	4b06      	ldr	r3, [pc, #24]	; (4f4 <_Z19interruptHandlerEICv+0x24>)
+ 4da:	2280      	movs	r2, #128	; 0x80
+ 4dc:	715a      	strb	r2, [r3, #5]
+ 4de:	3a40      	subs	r2, #64	; 0x40
+ 4e0:	715a      	strb	r2, [r3, #5]
+          Sets External Interrupt 0
+          @param index in range 0..7
+          @param value boolean value
+        */
+        __attribute__((always_inline)) Register& setEXTINT(int index, bool value) volatile {
+          raw = (raw & ~(0x1 << (0 + 1 * (index - 0)))) | ((((value)) << (0 + 1 * (index - 0))) & (0x1 << (0 + 1 * (index - 0))));
+ 4e2:	4a03      	ldr	r2, [pc, #12]	; (4f0 <_Z19interruptHandlerEICv+0x20>)
+ 4e4:	6913      	ldr	r3, [r2, #16]
+ 4e6:	2104      	movs	r1, #4
+ 4e8:	438b      	bics	r3, r1
+ 4ea:	430b      	orrs	r3, r1
+ 4ec:	6113      	str	r3, [r2, #16]
+}
+ 4ee:	4770      	bx	lr
+ 4f0:	40001800 	.word	0x40001800
+ 4f4:	42001800 	.word	0x42001800
+
+000004f8 <_Z15initApplicationv>:
+void initApplication() {
+ 4f8:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
+ 4fa:	46de      	mov	lr, fp
+ 4fc:	4657      	mov	r7, sl
+ 4fe:	464e      	mov	r6, r9
+ 500:	4645      	mov	r5, r8
+ 502:	b5e0      	push	{r5, r6, r7, lr}
+  genericTimer::clkHz = 1E6; // FIXME
+ 504:	4b91      	ldr	r3, [pc, #580]	; (74c <_Z15initApplicationv+0x254>)
+ 506:	4a92      	ldr	r2, [pc, #584]	; (750 <_Z15initApplicationv+0x258>)
+ 508:	601a      	str	r2, [r3, #0]
+  mark::init(4);
+ 50a:	2004      	movs	r0, #4
+ 50c:	f7ff fe5c 	bl	1c8 <_ZN4mark4initEi>
+    atsamd::safeboot::init(SAFE_BOOT_PIN, false, LED_PIN);
+ 510:	2205      	movs	r2, #5
+ 512:	2100      	movs	r1, #0
+ 514:	2008      	movs	r0, #8
+ 516:	f7ff feab 	bl	270 <_ZN6atsamd8safeboot4initEibi>
+          target::sysctrl::XOSC::GAIN::_8MHZ (0x2) 8MHz
+          target::sysctrl::XOSC::GAIN::_16MHZ (0x3) 16MHz
+          target::sysctrl::XOSC::GAIN::_30MHZ (0x4) 30MHz
+        */
+        __attribute__((always_inline)) Register& setGAIN(target::sysctrl::XOSC::GAIN value) volatile {
+          raw = (raw & ~(0x7 << 8)) | (((static_cast<unsigned long>(value)) << 8) & (0x7 << 8));
+ 51a:	4a8e      	ldr	r2, [pc, #568]	; (754 <_Z15initApplicationv+0x25c>)
+ 51c:	8a13      	ldrh	r3, [r2, #16]
+ 51e:	498e      	ldr	r1, [pc, #568]	; (758 <_Z15initApplicationv+0x260>)
+ 520:	400b      	ands	r3, r1
+ 522:	21c0      	movs	r1, #192	; 0xc0
+ 524:	0089      	lsls	r1, r1, #2
+ 526:	430b      	orrs	r3, r1
+ 528:	8213      	strh	r3, [r2, #16]
+          raw = (raw & ~(0x1 << 2)) | ((((value)) << 2) & (0x1 << 2));
+ 52a:	8a13      	ldrh	r3, [r2, #16]
+ 52c:	b21b      	sxth	r3, r3
+ 52e:	2004      	movs	r0, #4
+ 530:	4383      	bics	r3, r0
+ 532:	4303      	orrs	r3, r0
+ 534:	b29b      	uxth	r3, r3
+ 536:	8213      	strh	r3, [r2, #16]
+          raw = (raw & ~(0x1 << 1)) | ((((value)) << 1) & (0x1 << 1));
+ 538:	8a13      	ldrh	r3, [r2, #16]
+ 53a:	b21b      	sxth	r3, r3
+ 53c:	2002      	movs	r0, #2
+ 53e:	4383      	bics	r3, r0
+ 540:	4303      	orrs	r3, r0
+ 542:	b29b      	uxth	r3, r3
+ 544:	8213      	strh	r3, [r2, #16]
+        /**
+          Sets Generic Clock Generator Selection
+          @param value value in range 0..15
+        */
+        __attribute__((always_inline)) Register& setID(unsigned long value) volatile {
+          raw = (raw & ~(0xF << 0)) | ((((value)) << 0) & (0xF << 0));
+ 546:	2001      	movs	r0, #1
+        /**
+          Sets Division Factor
+          @param value value in range 0..65535
+        */
+        __attribute__((always_inline)) Register& setDIV(unsigned long value) volatile {
+          raw = (raw & ~(0xFFFF << 8)) | ((((value)) << 8) & (0xFFFF << 8));
+ 548:	4301      	orrs	r1, r0
+          raw = value;
+ 54a:	4a84      	ldr	r2, [pc, #528]	; (75c <_Z15initApplicationv+0x264>)
+ 54c:	6091      	str	r1, [r2, #8]
+          raw = (raw & ~(0x1 << 16)) | ((((value)) << 16) & (0x1 << 16));
+ 54e:	2380      	movs	r3, #128	; 0x80
+ 550:	025b      	lsls	r3, r3, #9
+ 552:	4303      	orrs	r3, r0
+          raw = value;
+ 554:	6053      	str	r3, [r2, #4]
+          return ((raw & (0x1 << 0)) >> 0);
+ 556:	4b7f      	ldr	r3, [pc, #508]	; (754 <_Z15initApplicationv+0x25c>)
+ 558:	68db      	ldr	r3, [r3, #12]
+    while (!target::SYSCTRL.PCLKSR.getXOSCRDY())
+ 55a:	07db      	lsls	r3, r3, #31
+ 55c:	d5fb      	bpl.n	556 <_Z15initApplicationv+0x5e>
+          raw = (raw & ~(0xF << 0)) | ((((value)) << 0) & (0xF << 0));
+ 55e:	2303      	movs	r3, #3
+          raw = (raw & ~(0xFFFF << 8)) | ((((value)) << 8) & (0xFFFF << 8));
+ 560:	21fa      	movs	r1, #250	; 0xfa
+ 562:	01c9      	lsls	r1, r1, #7
+ 564:	4319      	orrs	r1, r3
+          raw = value;
+ 566:	4a7d      	ldr	r2, [pc, #500]	; (75c <_Z15initApplicationv+0x264>)
+ 568:	6091      	str	r1, [r2, #8]
+          raw = (raw & ~(0x1F << 8)) | (((static_cast<unsigned long>(value)) << 8) & (0x1F << 8));
+ 56a:	2180      	movs	r1, #128	; 0x80
+ 56c:	0089      	lsls	r1, r1, #2
+ 56e:	4688      	mov	r8, r1
+ 570:	430b      	orrs	r3, r1
+          raw = (raw & ~(0x1 << 16)) | ((((value)) << 16) & (0x1 << 16));
+ 572:	2580      	movs	r5, #128	; 0x80
+ 574:	026d      	lsls	r5, r5, #9
+ 576:	432b      	orrs	r3, r5
+          raw = value;
+ 578:	6053      	str	r3, [r2, #4]
+          raw = (raw & ~(0x1 << 16)) | ((((value)) << 16) & (0x1 << 16));
+ 57a:	2381      	movs	r3, #129	; 0x81
+ 57c:	025b      	lsls	r3, r3, #9
+          raw = value;
+ 57e:	6053      	str	r3, [r2, #4]
+          raw = (raw & ~(0x1 << 14)) | ((((value)) << 14) & (0x1 << 14));
+ 580:	2001      	movs	r0, #1
+ 582:	23c0      	movs	r3, #192	; 0xc0
+ 584:	009b      	lsls	r3, r3, #2
+ 586:	4318      	orrs	r0, r3
+ 588:	2380      	movs	r3, #128	; 0x80
+ 58a:	01db      	lsls	r3, r3, #7
+ 58c:	4303      	orrs	r3, r0
+          raw = value;
+ 58e:	8053      	strh	r3, [r2, #2]
+          target::sysctrl::DPLLCTRLB::REFCLK::REF0 (0x0) CLK_DPLL_REF0 clock reference
+          target::sysctrl::DPLLCTRLB::REFCLK::REF1 (0x1) CLK_DPLL_REF1 clock reference
+          target::sysctrl::DPLLCTRLB::REFCLK::GCLK (0x2) GCLK_DPLL clock reference
+        */
+        __attribute__((always_inline)) Register& setREFCLK(target::sysctrl::DPLLCTRLB::REFCLK value) volatile {
+          raw = (raw & ~(0x3 << 4)) | (((static_cast<unsigned long>(value)) << 4) & (0x3 << 4));
+ 590:	4c70      	ldr	r4, [pc, #448]	; (754 <_Z15initApplicationv+0x25c>)
+ 592:	6ce3      	ldr	r3, [r4, #76]	; 0x4c
+ 594:	2030      	movs	r0, #48	; 0x30
+ 596:	4383      	bics	r3, r0
+ 598:	2720      	movs	r7, #32
+ 59a:	433b      	orrs	r3, r7
+ 59c:	64e3      	str	r3, [r4, #76]	; 0x4c
+          raw = (raw & ~(0xFFF << 0)) | ((((value)) << 0) & (0xFFF << 0));
+ 59e:	6ca3      	ldr	r3, [r4, #72]	; 0x48
+ 5a0:	0b1b      	lsrs	r3, r3, #12
+ 5a2:	031b      	lsls	r3, r3, #12
+ 5a4:	486e      	ldr	r0, [pc, #440]	; (760 <_Z15initApplicationv+0x268>)
+ 5a6:	4303      	orrs	r3, r0
+ 5a8:	64a3      	str	r3, [r4, #72]	; 0x48
+          raw = (raw & ~(0xF << 16)) | ((((value)) << 16) & (0xF << 16));
+ 5aa:	6ca3      	ldr	r3, [r4, #72]	; 0x48
+ 5ac:	486d      	ldr	r0, [pc, #436]	; (764 <_Z15initApplicationv+0x26c>)
+ 5ae:	4018      	ands	r0, r3
+ 5b0:	2380      	movs	r3, #128	; 0x80
+ 5b2:	029b      	lsls	r3, r3, #10
+ 5b4:	4303      	orrs	r3, r0
+ 5b6:	64a3      	str	r3, [r4, #72]	; 0x48
+          raw = (raw & ~(0x1 << 1)) | ((((value)) << 1) & (0x1 << 1));
+ 5b8:	2344      	movs	r3, #68	; 0x44
+ 5ba:	469c      	mov	ip, r3
+ 5bc:	5ce3      	ldrb	r3, [r4, r3]
+ 5be:	b25b      	sxtb	r3, r3
+ 5c0:	2602      	movs	r6, #2
+ 5c2:	43b3      	bics	r3, r6
+ 5c4:	2002      	movs	r0, #2
+ 5c6:	4303      	orrs	r3, r0
+ 5c8:	b2db      	uxtb	r3, r3
+ 5ca:	4661      	mov	r1, ip
+ 5cc:	5463      	strb	r3, [r4, r1]
+          raw = (raw & ~(0xF << 0)) | ((((value)) << 0) & (0xF << 0));
+ 5ce:	2404      	movs	r4, #4
+          raw = (raw & ~(0xFFFF << 8)) | ((((value)) << 8) & (0xFFFF << 8));
+ 5d0:	4643      	mov	r3, r8
+ 5d2:	4323      	orrs	r3, r4
+          raw = value;
+ 5d4:	6093      	str	r3, [r2, #8]
+          raw = (raw & ~(0x1F << 8)) | (((static_cast<unsigned long>(value)) << 8) & (0x1F << 8));
+ 5d6:	2380      	movs	r3, #128	; 0x80
+ 5d8:	011b      	lsls	r3, r3, #4
+ 5da:	469c      	mov	ip, r3
+          raw = (raw & ~(0x1 << 19)) | ((((value)) << 19) & (0x1 << 19));
+ 5dc:	4323      	orrs	r3, r4
+ 5de:	4699      	mov	r9, r3
+ 5e0:	2380      	movs	r3, #128	; 0x80
+ 5e2:	031b      	lsls	r3, r3, #12
+ 5e4:	4649      	mov	r1, r9
+ 5e6:	430b      	orrs	r3, r1
+          raw = (raw & ~(0x1 << 16)) | ((((value)) << 16) & (0x1 << 16));
+ 5e8:	495f      	ldr	r1, [pc, #380]	; (768 <_Z15initApplicationv+0x270>)
+ 5ea:	400b      	ands	r3, r1
+ 5ec:	432b      	orrs	r3, r5
+          raw = value;
+ 5ee:	6053      	str	r3, [r2, #4]
+          raw = (raw & ~(0xF << 0)) | (((static_cast<unsigned long>(value)) << 0) & (0xF << 0));
+ 5f0:	4b5e      	ldr	r3, [pc, #376]	; (76c <_Z15initApplicationv+0x274>)
+ 5f2:	2137      	movs	r1, #55	; 0x37
+ 5f4:	4689      	mov	r9, r1
+ 5f6:	5c5d      	ldrb	r5, [r3, r1]
+ 5f8:	3928      	subs	r1, #40	; 0x28
+ 5fa:	438d      	bics	r5, r1
+ 5fc:	2107      	movs	r1, #7
+ 5fe:	468a      	mov	sl, r1
+ 600:	4651      	mov	r1, sl
+ 602:	430d      	orrs	r5, r1
+ 604:	4649      	mov	r1, r9
+ 606:	545d      	strb	r5, [r3, r1]
+          raw = (raw & ~(0x1 << 0)) | ((((value)) << 0) & (0x1 << 0));
+ 608:	3117      	adds	r1, #23
+ 60a:	4689      	mov	r9, r1
+ 60c:	5c5d      	ldrb	r5, [r3, r1]
+ 60e:	b26d      	sxtb	r5, r5
+ 610:	394d      	subs	r1, #77	; 0x4d
+ 612:	438d      	bics	r5, r1
+ 614:	468b      	mov	fp, r1
+ 616:	4659      	mov	r1, fp
+ 618:	430d      	orrs	r5, r1
+ 61a:	b2ed      	uxtb	r5, r5
+ 61c:	4649      	mov	r1, r9
+ 61e:	545d      	strb	r5, [r3, r1]
+ 620:	4953      	ldr	r1, [pc, #332]	; (770 <_Z15initApplicationv+0x278>)
+ 622:	4689      	mov	r9, r1
+ 624:	69cd      	ldr	r5, [r1, #28]
+ 626:	2108      	movs	r1, #8
+ 628:	438d      	bics	r5, r1
+ 62a:	430d      	orrs	r5, r1
+ 62c:	4649      	mov	r1, r9
+ 62e:	61cd      	str	r5, [r1, #28]
+          raw = (raw & ~(0xFFFFFFFF << 0)) | ((((value)) << 0) & (0xFFFFFFFF << 0));
+ 630:	689d      	ldr	r5, [r3, #8]
+ 632:	609f      	str	r7, [r3, #8]
+          raw = (raw & ~(0xFFFFFFFF << 0)) | ((((value)) << 0) & (0xFFFFFFFF << 0));
+ 634:	685d      	ldr	r5, [r3, #4]
+ 636:	605c      	str	r4, [r3, #4]
+          raw = (raw & ~(0x1 << 1)) | ((((value)) << 1) & (0x1 << 1));
+ 638:	2142      	movs	r1, #66	; 0x42
+ 63a:	468a      	mov	sl, r1
+ 63c:	5c5d      	ldrb	r5, [r3, r1]
+ 63e:	b26d      	sxtb	r5, r5
+ 640:	43b5      	bics	r5, r6
+ 642:	4305      	orrs	r5, r0
+ 644:	b2ed      	uxtb	r5, r5
+ 646:	545d      	strb	r5, [r3, r1]
+          raw = (raw & ~(0x1 << 0)) | ((((value)) << 0) & (0x1 << 0));
+ 648:	5c5d      	ldrb	r5, [r3, r1]
+ 64a:	b26d      	sxtb	r5, r5
+ 64c:	3941      	subs	r1, #65	; 0x41
+ 64e:	438d      	bics	r5, r1
+ 650:	4659      	mov	r1, fp
+ 652:	430d      	orrs	r5, r1
+ 654:	b2ed      	uxtb	r5, r5
+ 656:	4651      	mov	r1, sl
+ 658:	545d      	strb	r5, [r3, r1]
+          raw = value;
+ 65a:	4b46      	ldr	r3, [pc, #280]	; (774 <_Z15initApplicationv+0x27c>)
+ 65c:	8053      	strh	r3, [r2, #2]
+          target::eic::CONFIG::SENSE::BOTH (0x3) Both-edges detection
+          target::eic::CONFIG::SENSE::HIGH (0x4) High-level detection
+          target::eic::CONFIG::SENSE::LOW (0x5) Low-level detection
+        */
+        __attribute__((always_inline)) Register& setSENSE(int index, target::eic::CONFIG::SENSE value) volatile {
+          raw = (raw & ~(0x7 << (0 + 4 * (index - 0)))) | (((static_cast<unsigned long>(value)) << (0 + 4 * (index - 0))) & (0x7 << (0 + 4 * (index - 0))));
+ 65e:	4d46      	ldr	r5, [pc, #280]	; (778 <_Z15initApplicationv+0x280>)
+ 660:	69ab      	ldr	r3, [r5, #24]
+ 662:	493d      	ldr	r1, [pc, #244]	; (758 <_Z15initApplicationv+0x260>)
+ 664:	468a      	mov	sl, r1
+ 666:	4019      	ands	r1, r3
+ 668:	2380      	movs	r3, #128	; 0x80
+ 66a:	005b      	lsls	r3, r3, #1
+ 66c:	430b      	orrs	r3, r1
+ 66e:	61ab      	str	r3, [r5, #24]
+          Sets Filter 0 Enable
+          @param index in range 0..7
+          @param value boolean value
+        */
+        __attribute__((always_inline)) Register& setFILTEN(int index, bool value) volatile {
+          raw = (raw & ~(0x1 << (3 + 4 * (index - 0)))) | ((((value)) << (3 + 4 * (index - 0))) & (0x1 << (3 + 4 * (index - 0))));
+ 670:	69ab      	ldr	r3, [r5, #24]
+ 672:	4942      	ldr	r1, [pc, #264]	; (77c <_Z15initApplicationv+0x284>)
+ 674:	400b      	ands	r3, r1
+ 676:	4661      	mov	r1, ip
+ 678:	430b      	orrs	r3, r1
+ 67a:	61ab      	str	r3, [r5, #24]
+          raw = (raw & ~(0x1 << 1)) | ((((value)) << 1) & (0x1 << 1));
+ 67c:	782b      	ldrb	r3, [r5, #0]
+ 67e:	b25b      	sxtb	r3, r3
+ 680:	43b3      	bics	r3, r6
+ 682:	4303      	orrs	r3, r0
+ 684:	b2db      	uxtb	r3, r3
+ 686:	702b      	strb	r3, [r5, #0]
+        /**
+          Sets SETENA
+          @param value value in range 0..4294967295
+        */
+        __attribute__((always_inline)) Register& setSETENA(unsigned long value) volatile {
+          raw = (raw & ~(0xFFFFFFFF << 0)) | ((((value)) << 0) & (0xFFFFFFFF << 0));
+ 688:	483d      	ldr	r0, [pc, #244]	; (780 <_Z15initApplicationv+0x288>)
+ 68a:	6803      	ldr	r3, [r0, #0]
+ 68c:	2310      	movs	r3, #16
+ 68e:	469c      	mov	ip, r3
+ 690:	6003      	str	r3, [r0, #0]
+ 692:	4b3c      	ldr	r3, [pc, #240]	; (784 <_Z15initApplicationv+0x28c>)
+ 694:	8053      	strh	r3, [r2, #2]
+          Sets TC1 APB Clock Enable
+          @param index in range 1..2
+          @param value boolean value
+        */
+        __attribute__((always_inline)) Register& setTC(int index, bool value) volatile {
+          raw = (raw & ~(0x1 << (6 + 1 * (index - 1)))) | ((((value)) << (6 + 1 * (index - 1))) & (0x1 << (6 + 1 * (index - 1))));
+ 696:	464b      	mov	r3, r9
+ 698:	6a1b      	ldr	r3, [r3, #32]
+ 69a:	2240      	movs	r2, #64	; 0x40
+ 69c:	4393      	bics	r3, r2
+ 69e:	4313      	orrs	r3, r2
+ 6a0:	464a      	mov	r2, r9
+ 6a2:	6213      	str	r3, [r2, #32]
+            raw = (raw & ~(0x3 << 2)) | (((static_cast<unsigned long>(value)) << 2) & (0x3 << 2));
+ 6a4:	4b38      	ldr	r3, [pc, #224]	; (788 <_Z15initApplicationv+0x290>)
+ 6a6:	881a      	ldrh	r2, [r3, #0]
+ 6a8:	210c      	movs	r1, #12
+ 6aa:	438a      	bics	r2, r1
+ 6ac:	2108      	movs	r1, #8
+ 6ae:	4689      	mov	r9, r1
+ 6b0:	4649      	mov	r1, r9
+ 6b2:	430a      	orrs	r2, r1
+ 6b4:	801a      	strh	r2, [r3, #0]
+            raw = (raw & ~(0x7 << 8)) | (((static_cast<unsigned long>(value)) << 8) & (0x7 << 8));
+ 6b6:	881a      	ldrh	r2, [r3, #0]
+ 6b8:	4651      	mov	r1, sl
+ 6ba:	400a      	ands	r2, r1
+ 6bc:	4641      	mov	r1, r8
+ 6be:	430a      	orrs	r2, r1
+ 6c0:	801a      	strh	r2, [r3, #0]
+            raw = (raw & ~(0x1 << 2)) | ((((value)) << 2) & (0x1 << 2));
+ 6c2:	795a      	ldrb	r2, [r3, #5]
+ 6c4:	b252      	sxtb	r2, r2
+ 6c6:	43a2      	bics	r2, r4
+ 6c8:	2104      	movs	r1, #4
+ 6ca:	4688      	mov	r8, r1
+ 6cc:	4641      	mov	r1, r8
+ 6ce:	430a      	orrs	r2, r1
+ 6d0:	b2d2      	uxtb	r2, r2
+ 6d2:	715a      	strb	r2, [r3, #5]
+            raw = (raw & ~(0x3 << 6)) | (((static_cast<unsigned long>(value)) << 6) & (0x3 << 6));
+ 6d4:	795a      	ldrb	r2, [r3, #5]
+ 6d6:	213f      	movs	r1, #63	; 0x3f
+ 6d8:	4011      	ands	r1, r2
+ 6da:	2280      	movs	r2, #128	; 0x80
+ 6dc:	4252      	negs	r2, r2
+ 6de:	430a      	orrs	r2, r1
+ 6e0:	b2d2      	uxtb	r2, r2
+ 6e2:	715a      	strb	r2, [r3, #5]
+      namespace CC {
+        class Register {
+          volatile unsigned long raw;
+          public:
+          __attribute__((always_inline)) void operator= (unsigned long value) volatile {
+            raw = value;
+ 6e4:	22fa      	movs	r2, #250	; 0xfa
+ 6e6:	0092      	lsls	r2, r2, #2
+ 6e8:	619a      	str	r2, [r3, #24]
+            raw = (raw & ~(0x1 << (4 + 1 * (index - 0)))) | ((((value)) << (4 + 1 * (index - 0))) & (0x1 << (4 + 1 * (index - 0))));
+ 6ea:	7b5a      	ldrb	r2, [r3, #13]
+ 6ec:	b252      	sxtb	r2, r2
+ 6ee:	4661      	mov	r1, ip
+ 6f0:	438a      	bics	r2, r1
+ 6f2:	430a      	orrs	r2, r1
+ 6f4:	b2d2      	uxtb	r2, r2
+ 6f6:	735a      	strb	r2, [r3, #13]
+            raw = value;
+ 6f8:	4a24      	ldr	r2, [pc, #144]	; (78c <_Z15initApplicationv+0x294>)
+ 6fa:	61da      	str	r2, [r3, #28]
+            raw = (raw & ~(0x1 << (4 + 1 * (index - 0)))) | ((((value)) << (4 + 1 * (index - 0))) & (0x1 << (4 + 1 * (index - 0))));
+ 6fc:	7b5a      	ldrb	r2, [r3, #13]
+ 6fe:	b252      	sxtb	r2, r2
+ 700:	43ba      	bics	r2, r7
+ 702:	433a      	orrs	r2, r7
+ 704:	b2d2      	uxtb	r2, r2
+ 706:	735a      	strb	r2, [r3, #13]
+            raw = (raw & ~(0x1 << 1)) | ((((value)) << 1) & (0x1 << 1));
+ 708:	881a      	ldrh	r2, [r3, #0]
+ 70a:	b212      	sxth	r2, r2
+ 70c:	43b2      	bics	r2, r6
+ 70e:	4332      	orrs	r2, r6
+ 710:	b292      	uxth	r2, r2
+ 712:	801a      	strh	r2, [r3, #0]
+ 714:	6803      	ldr	r3, [r0, #0]
+ 716:	2380      	movs	r3, #128	; 0x80
+ 718:	019b      	lsls	r3, r3, #6
+ 71a:	6003      	str	r3, [r0, #0]
+    this->address = address;
+ 71c:	4e1c      	ldr	r6, [pc, #112]	; (790 <_Z15initApplicationv+0x298>)
+ 71e:	2301      	movs	r3, #1
+ 720:	8233      	strh	r3, [r6, #16]
+    rxEventId = applicationEvents::createEventId();
+ 722:	f7ff fd35 	bl	190 <_ZN17applicationEvents13createEventIdEv>
+ 726:	2394      	movs	r3, #148	; 0x94
+ 728:	005b      	lsls	r3, r3, #1
+ 72a:	50f0      	str	r0, [r6, r3]
+			this->eventId = eventId;
+ 72c:	6070      	str	r0, [r6, #4]
+			nextHandler = applicationEvents::firstHandler;
+ 72e:	4b19      	ldr	r3, [pc, #100]	; (794 <_Z15initApplicationv+0x29c>)
+ 730:	681a      	ldr	r2, [r3, #0]
+ 732:	60f2      	str	r2, [r6, #12]
+			applicationEvents::firstHandler = this;
+ 734:	601e      	str	r6, [r3, #0]
+          raw = (raw & ~(0x1 << (0 + 1 * (index - 0)))) | ((((value)) << (0 + 1 * (index - 0))) & (0x1 << (0 + 1 * (index - 0))));
+ 736:	68eb      	ldr	r3, [r5, #12]
+ 738:	43a3      	bics	r3, r4
+ 73a:	431c      	orrs	r4, r3
+ 73c:	60ec      	str	r4, [r5, #12]
+}
+ 73e:	bc3c      	pop	{r2, r3, r4, r5}
+ 740:	4690      	mov	r8, r2
+ 742:	4699      	mov	r9, r3
+ 744:	46a2      	mov	sl, r4
+ 746:	46ab      	mov	fp, r5
+ 748:	bdf8      	pop	{r3, r4, r5, r6, r7, pc}
+ 74a:	46c0      	nop			; (mov r8, r8)
+ 74c:	20000000 	.word	0x20000000
+ 750:	000f4240 	.word	0x000f4240
+ 754:	40000800 	.word	0x40000800
+ 758:	fffff8ff 	.word	0xfffff8ff
+ 75c:	40000c00 	.word	0x40000c00
+ 760:	0000069f 	.word	0x0000069f
+ 764:	fff0ffff 	.word	0xfff0ffff
+ 768:	fffeffff 	.word	0xfffeffff
+ 76c:	41004400 	.word	0x41004400
+ 770:	40000400 	.word	0x40000400
+ 774:	00004005 	.word	0x00004005
+ 778:	40001800 	.word	0x40001800
+ 77c:	fffff7ff 	.word	0xfffff7ff
+ 780:	e000e100 	.word	0xe000e100
+ 784:	00004012 	.word	0x00004012
+ 788:	42001800 	.word	0x42001800
+ 78c:	000009c4 	.word	0x000009c4
+ 790:	20000010 	.word	0x20000010
+ 794:	20000008 	.word	0x20000008
+
+00000798 <_GLOBAL__sub_I__ZN17applicationEvents12firstHandlerE>:
+ 798:	b510      	push	{r4, lr}
+ 79a:	4902      	ldr	r1, [pc, #8]	; (7a4 <_GLOBAL__sub_I__ZN17applicationEvents12firstHandlerE+0xc>)
+ 79c:	2001      	movs	r0, #1
+ 79e:	f7ff fcc3 	bl	128 <_Z41__static_initialization_and_destruction_0ii>
+ 7a2:	bd10      	pop	{r4, pc}
+ 7a4:	0000ffff 	.word	0x0000ffff
+
+000007a8 <__divsi3>:
+ 7a8:	4603      	mov	r3, r0
+ 7aa:	430b      	orrs	r3, r1
+ 7ac:	d47f      	bmi.n	8ae <__divsi3+0x106>
+ 7ae:	2200      	movs	r2, #0
+ 7b0:	0843      	lsrs	r3, r0, #1
+ 7b2:	428b      	cmp	r3, r1
+ 7b4:	d374      	bcc.n	8a0 <__divsi3+0xf8>
+ 7b6:	0903      	lsrs	r3, r0, #4
+ 7b8:	428b      	cmp	r3, r1
+ 7ba:	d35f      	bcc.n	87c <__divsi3+0xd4>
+ 7bc:	0a03      	lsrs	r3, r0, #8
+ 7be:	428b      	cmp	r3, r1
+ 7c0:	d344      	bcc.n	84c <__divsi3+0xa4>
+ 7c2:	0b03      	lsrs	r3, r0, #12
+ 7c4:	428b      	cmp	r3, r1
+ 7c6:	d328      	bcc.n	81a <__divsi3+0x72>
+ 7c8:	0c03      	lsrs	r3, r0, #16
+ 7ca:	428b      	cmp	r3, r1
+ 7cc:	d30d      	bcc.n	7ea <__divsi3+0x42>
+ 7ce:	22ff      	movs	r2, #255	; 0xff
+ 7d0:	0209      	lsls	r1, r1, #8
+ 7d2:	ba12      	rev	r2, r2
+ 7d4:	0c03      	lsrs	r3, r0, #16
+ 7d6:	428b      	cmp	r3, r1
+ 7d8:	d302      	bcc.n	7e0 <__divsi3+0x38>
+ 7da:	1212      	asrs	r2, r2, #8
+ 7dc:	0209      	lsls	r1, r1, #8
+ 7de:	d065      	beq.n	8ac <__divsi3+0x104>
+ 7e0:	0b03      	lsrs	r3, r0, #12
+ 7e2:	428b      	cmp	r3, r1
+ 7e4:	d319      	bcc.n	81a <__divsi3+0x72>
+ 7e6:	e000      	b.n	7ea <__divsi3+0x42>
+ 7e8:	0a09      	lsrs	r1, r1, #8
+ 7ea:	0bc3      	lsrs	r3, r0, #15
+ 7ec:	428b      	cmp	r3, r1
+ 7ee:	d301      	bcc.n	7f4 <__divsi3+0x4c>
+ 7f0:	03cb      	lsls	r3, r1, #15
+ 7f2:	1ac0      	subs	r0, r0, r3
+ 7f4:	4152      	adcs	r2, r2
+ 7f6:	0b83      	lsrs	r3, r0, #14
+ 7f8:	428b      	cmp	r3, r1
+ 7fa:	d301      	bcc.n	800 <__divsi3+0x58>
+ 7fc:	038b      	lsls	r3, r1, #14
+ 7fe:	1ac0      	subs	r0, r0, r3
+ 800:	4152      	adcs	r2, r2
+ 802:	0b43      	lsrs	r3, r0, #13
+ 804:	428b      	cmp	r3, r1
+ 806:	d301      	bcc.n	80c <__divsi3+0x64>
+ 808:	034b      	lsls	r3, r1, #13
+ 80a:	1ac0      	subs	r0, r0, r3
+ 80c:	4152      	adcs	r2, r2
+ 80e:	0b03      	lsrs	r3, r0, #12
+ 810:	428b      	cmp	r3, r1
+ 812:	d301      	bcc.n	818 <__divsi3+0x70>
+ 814:	030b      	lsls	r3, r1, #12
+ 816:	1ac0      	subs	r0, r0, r3
+ 818:	4152      	adcs	r2, r2
+ 81a:	0ac3      	lsrs	r3, r0, #11
+ 81c:	428b      	cmp	r3, r1
+ 81e:	d301      	bcc.n	824 <__divsi3+0x7c>
+ 820:	02cb      	lsls	r3, r1, #11
+ 822:	1ac0      	subs	r0, r0, r3
+ 824:	4152      	adcs	r2, r2
+ 826:	0a83      	lsrs	r3, r0, #10
+ 828:	428b      	cmp	r3, r1
+ 82a:	d301      	bcc.n	830 <__divsi3+0x88>
+ 82c:	028b      	lsls	r3, r1, #10
+ 82e:	1ac0      	subs	r0, r0, r3
+ 830:	4152      	adcs	r2, r2
+ 832:	0a43      	lsrs	r3, r0, #9
+ 834:	428b      	cmp	r3, r1
+ 836:	d301      	bcc.n	83c <__divsi3+0x94>
+ 838:	024b      	lsls	r3, r1, #9
+ 83a:	1ac0      	subs	r0, r0, r3
+ 83c:	4152      	adcs	r2, r2
+ 83e:	0a03      	lsrs	r3, r0, #8
+ 840:	428b      	cmp	r3, r1
+ 842:	d301      	bcc.n	848 <__divsi3+0xa0>
+ 844:	020b      	lsls	r3, r1, #8
+ 846:	1ac0      	subs	r0, r0, r3
+ 848:	4152      	adcs	r2, r2
+ 84a:	d2cd      	bcs.n	7e8 <__divsi3+0x40>
+ 84c:	09c3      	lsrs	r3, r0, #7
+ 84e:	428b      	cmp	r3, r1
+ 850:	d301      	bcc.n	856 <__divsi3+0xae>
+ 852:	01cb      	lsls	r3, r1, #7
+ 854:	1ac0      	subs	r0, r0, r3
+ 856:	4152      	adcs	r2, r2
+ 858:	0983      	lsrs	r3, r0, #6
+ 85a:	428b      	cmp	r3, r1
+ 85c:	d301      	bcc.n	862 <__divsi3+0xba>
+ 85e:	018b      	lsls	r3, r1, #6
+ 860:	1ac0      	subs	r0, r0, r3
+ 862:	4152      	adcs	r2, r2
+ 864:	0943      	lsrs	r3, r0, #5
+ 866:	428b      	cmp	r3, r1
+ 868:	d301      	bcc.n	86e <__divsi3+0xc6>
+ 86a:	014b      	lsls	r3, r1, #5
+ 86c:	1ac0      	subs	r0, r0, r3
+ 86e:	4152      	adcs	r2, r2
+ 870:	0903      	lsrs	r3, r0, #4
+ 872:	428b      	cmp	r3, r1
+ 874:	d301      	bcc.n	87a <__divsi3+0xd2>
+ 876:	010b      	lsls	r3, r1, #4
+ 878:	1ac0      	subs	r0, r0, r3
+ 87a:	4152      	adcs	r2, r2
+ 87c:	08c3      	lsrs	r3, r0, #3
+ 87e:	428b      	cmp	r3, r1
+ 880:	d301      	bcc.n	886 <__divsi3+0xde>
+ 882:	00cb      	lsls	r3, r1, #3
+ 884:	1ac0      	subs	r0, r0, r3
+ 886:	4152      	adcs	r2, r2
+ 888:	0883      	lsrs	r3, r0, #2
+ 88a:	428b      	cmp	r3, r1
+ 88c:	d301      	bcc.n	892 <__divsi3+0xea>
+ 88e:	008b      	lsls	r3, r1, #2
+ 890:	1ac0      	subs	r0, r0, r3
+ 892:	4152      	adcs	r2, r2
+ 894:	0843      	lsrs	r3, r0, #1
+ 896:	428b      	cmp	r3, r1
+ 898:	d301      	bcc.n	89e <__divsi3+0xf6>
+ 89a:	004b      	lsls	r3, r1, #1
+ 89c:	1ac0      	subs	r0, r0, r3
+ 89e:	4152      	adcs	r2, r2
+ 8a0:	1a41      	subs	r1, r0, r1
+ 8a2:	d200      	bcs.n	8a6 <__divsi3+0xfe>
+ 8a4:	4601      	mov	r1, r0
+ 8a6:	4152      	adcs	r2, r2
+ 8a8:	4610      	mov	r0, r2
+ 8aa:	4770      	bx	lr
+ 8ac:	e05d      	b.n	96a <__divsi3+0x1c2>
+ 8ae:	0fca      	lsrs	r2, r1, #31
+ 8b0:	d000      	beq.n	8b4 <__divsi3+0x10c>
+ 8b2:	4249      	negs	r1, r1
+ 8b4:	1003      	asrs	r3, r0, #32
+ 8b6:	d300      	bcc.n	8ba <__divsi3+0x112>
+ 8b8:	4240      	negs	r0, r0
+ 8ba:	4053      	eors	r3, r2
+ 8bc:	2200      	movs	r2, #0
+ 8be:	469c      	mov	ip, r3
+ 8c0:	0903      	lsrs	r3, r0, #4
+ 8c2:	428b      	cmp	r3, r1
+ 8c4:	d32d      	bcc.n	922 <__divsi3+0x17a>
+ 8c6:	0a03      	lsrs	r3, r0, #8
+ 8c8:	428b      	cmp	r3, r1
+ 8ca:	d312      	bcc.n	8f2 <__divsi3+0x14a>
+ 8cc:	22fc      	movs	r2, #252	; 0xfc
+ 8ce:	0189      	lsls	r1, r1, #6
+ 8d0:	ba12      	rev	r2, r2
+ 8d2:	0a03      	lsrs	r3, r0, #8
+ 8d4:	428b      	cmp	r3, r1
+ 8d6:	d30c      	bcc.n	8f2 <__divsi3+0x14a>
+ 8d8:	0189      	lsls	r1, r1, #6
+ 8da:	1192      	asrs	r2, r2, #6
+ 8dc:	428b      	cmp	r3, r1
+ 8de:	d308      	bcc.n	8f2 <__divsi3+0x14a>
+ 8e0:	0189      	lsls	r1, r1, #6
+ 8e2:	1192      	asrs	r2, r2, #6
+ 8e4:	428b      	cmp	r3, r1
+ 8e6:	d304      	bcc.n	8f2 <__divsi3+0x14a>
+ 8e8:	0189      	lsls	r1, r1, #6
+ 8ea:	d03a      	beq.n	962 <__divsi3+0x1ba>
+ 8ec:	1192      	asrs	r2, r2, #6
+ 8ee:	e000      	b.n	8f2 <__divsi3+0x14a>
+ 8f0:	0989      	lsrs	r1, r1, #6
+ 8f2:	09c3      	lsrs	r3, r0, #7
+ 8f4:	428b      	cmp	r3, r1
+ 8f6:	d301      	bcc.n	8fc <__divsi3+0x154>
+ 8f8:	01cb      	lsls	r3, r1, #7
+ 8fa:	1ac0      	subs	r0, r0, r3
+ 8fc:	4152      	adcs	r2, r2
+ 8fe:	0983      	lsrs	r3, r0, #6
+ 900:	428b      	cmp	r3, r1
+ 902:	d301      	bcc.n	908 <__divsi3+0x160>
+ 904:	018b      	lsls	r3, r1, #6
+ 906:	1ac0      	subs	r0, r0, r3
+ 908:	4152      	adcs	r2, r2
+ 90a:	0943      	lsrs	r3, r0, #5
+ 90c:	428b      	cmp	r3, r1
+ 90e:	d301      	bcc.n	914 <__divsi3+0x16c>
+ 910:	014b      	lsls	r3, r1, #5
+ 912:	1ac0      	subs	r0, r0, r3
+ 914:	4152      	adcs	r2, r2
+ 916:	0903      	lsrs	r3, r0, #4
+ 918:	428b      	cmp	r3, r1
+ 91a:	d301      	bcc.n	920 <__divsi3+0x178>
+ 91c:	010b      	lsls	r3, r1, #4
+ 91e:	1ac0      	subs	r0, r0, r3
+ 920:	4152      	adcs	r2, r2
+ 922:	08c3      	lsrs	r3, r0, #3
+ 924:	428b      	cmp	r3, r1
+ 926:	d301      	bcc.n	92c <__divsi3+0x184>
+ 928:	00cb      	lsls	r3, r1, #3
+ 92a:	1ac0      	subs	r0, r0, r3
+ 92c:	4152      	adcs	r2, r2
+ 92e:	0883      	lsrs	r3, r0, #2
+ 930:	428b      	cmp	r3, r1
+ 932:	d301      	bcc.n	938 <__divsi3+0x190>
+ 934:	008b      	lsls	r3, r1, #2
+ 936:	1ac0      	subs	r0, r0, r3
+ 938:	4152      	adcs	r2, r2
+ 93a:	d2d9      	bcs.n	8f0 <__divsi3+0x148>
+ 93c:	0843      	lsrs	r3, r0, #1
+ 93e:	428b      	cmp	r3, r1
+ 940:	d301      	bcc.n	946 <__divsi3+0x19e>
+ 942:	004b      	lsls	r3, r1, #1
+ 944:	1ac0      	subs	r0, r0, r3
+ 946:	4152      	adcs	r2, r2
+ 948:	1a41      	subs	r1, r0, r1
+ 94a:	d200      	bcs.n	94e <__divsi3+0x1a6>
+ 94c:	4601      	mov	r1, r0
+ 94e:	4663      	mov	r3, ip
+ 950:	4152      	adcs	r2, r2
+ 952:	105b      	asrs	r3, r3, #1
+ 954:	4610      	mov	r0, r2
+ 956:	d301      	bcc.n	95c <__divsi3+0x1b4>
+ 958:	4240      	negs	r0, r0
+ 95a:	2b00      	cmp	r3, #0
+ 95c:	d500      	bpl.n	960 <__divsi3+0x1b8>
+ 95e:	4249      	negs	r1, r1
+ 960:	4770      	bx	lr
+ 962:	4663      	mov	r3, ip
+ 964:	105b      	asrs	r3, r3, #1
+ 966:	d300      	bcc.n	96a <__divsi3+0x1c2>
+ 968:	4240      	negs	r0, r0
+ 96a:	b501      	push	{r0, lr}
+ 96c:	2000      	movs	r0, #0
+ 96e:	f000 f805 	bl	97c <__aeabi_idiv0>
+ 972:	bd02      	pop	{r1, pc}
+
+00000974 <__aeabi_idivmod>:
+ 974:	2900      	cmp	r1, #0
+ 976:	d0f8      	beq.n	96a <__divsi3+0x1c2>
+ 978:	e716      	b.n	7a8 <__divsi3>
+ 97a:	4770      	bx	lr
+
+0000097c <__aeabi_idiv0>:
+ 97c:	4770      	bx	lr
+ 97e:	46c0      	nop			; (mov r8, r8)

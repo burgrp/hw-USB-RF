@@ -7,31 +7,6 @@ class App {
 public:
   class : public ookey::rx::Decoder {
   public:
-    void setTimerInterrupt(int time) {
-      // 	target::TC1.COUNT32.COUNT = 0;
-      // if (time)
-      // {
-      // 	target::TC1.COUNT32.CC[0].setCC(time);
-      // 	target::TC1.COUNT32.INTENSET.setOVF(1);
-      // }
-      // else
-      // {
-      // 	target::TC1.COUNT32.INTENSET.setOVF(0);
-      // 	target::TC1.COUNT32.CC[0].setCC(0xFFFFFFFF);
-      // }
-    }
-
-    void setRfPinInterrupt(bool enabled) {
-      // if (enabled)
-      // {
-      // 	target::EIC.INTENSET.setEXTINT(RF_DATA_EXTIN, 1);
-      // }
-      // else
-      // {
-      // 	target::EIC.INTENCLR.setEXTINT(RF_DATA_EXTIN, 1);
-      // }
-    }
-
     void dataReceived(unsigned char *data, int len) {
       target::PORT.OUTTGL.setOUTTGL(1 << LED_PIN);
     }
@@ -41,20 +16,27 @@ public:
   void init() {
     atsamd::safeboot::init(SAFE_BOOT_PIN, false, LED_PIN);
 
+    target::gclk::GENDIV::Register workGendiv;
+    target::gclk::GENCTRL::Register workGenctrl;
+    target::gclk::CLKCTRL::Register workClkctrl;
+
     //////////////////////////////////////////////////////////////////////////
 
     // enable external crystal oscillator
-    target::SYSCTRL.XOSC.setGAIN(3);
-    target::SYSCTRL.XOSC.setXTALEN(1);
-    target::SYSCTRL.XOSC.setENABLE(1);
+    target::SYSCTRL.XOSC.setGAIN(target::sysctrl::XOSC::GAIN::_16MHZ);
+    target::SYSCTRL.XOSC.setXTALEN(true);
+    target::SYSCTRL.XOSC.setENABLE(true);
 
     //////////////////////////////////////////////////////////////////////////
 
     // GEN1: divide output to 4MHz to be suitable for 32kHz division later
-    target::GCLK.GENDIV = 3 << 8 | 1;
+    target::GCLK.GENDIV = workGendiv.zero().setID(1).setDIV(3);
 
     // GEN1: generator enabled, clocked from XOSC
-    target::GCLK.GENCTRL = 1 << 16 | 0 << 8 | 1;
+    target::GCLK.GENCTRL = workGenctrl.zero()
+                               .setID(1)
+                               .setSRC(target::gclk::GENCTRL::SRC::XOSC)
+                               .setGENEN(true);
 
     // wait for XOSC ready
     while (!target::SYSCTRL.PCLKSR.getXOSCRDY())
@@ -63,10 +45,13 @@ public:
     //////////////////////////////////////////////////////////////////////////
 
     // GEN3: divide output to 32kHz
-    target::GCLK.GENDIV = 125 << 8 | 3;
+    target::GCLK.GENDIV = workGendiv.zero().setID(3).setDIV(125);
 
     // GEN3: generator enabled, clocked from GEN1
-    target::GCLK.GENCTRL = 1 << 16 | 2 << 8 | 3;
+    target::GCLK.GENCTRL = workGenctrl.zero()
+                               .setID(3)
+                               .setSRC(target::gclk::GENCTRL::SRC::GCLKGEN1)
+                               .setGENEN(true);
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -101,57 +86,72 @@ public:
     //////////////////////////////////////////////////////////////////////////
 
     // GEN0: clocked from GEN1 (4MHz)
-    target::GCLK.GENCTRL = 1 << 16 | 2 << 8 | 0;
+    target::GCLK.GENCTRL = workGenctrl.zero()
+                               .setID(0)
+                               .setSRC(target::gclk::GENCTRL::SRC::GCLKGEN1)
+                               .setGENEN(true);
 
     //////////////////////////////////////////////////////////////////////////
 
     // PLL96: clocked from GEN3 (32kHz)
-    target::GCLK.CLKCTRL = 1 << 14 | 3 << 8 | 0x01;
+    target::GCLK.CLKCTRL = workClkctrl.zero()
+                               .setID(target::gclk::CLKCTRL::ID::FDPLL)
+                               .setGEN(target::gclk::CLKCTRL::GEN::GCLK3)
+                               .setCLKEN(true);
 
     // PLL96: reference clock is GCLK_DPLL
-    target::SYSCTRL.DPLLCTRLB.setREFCLK(2);
+    target::SYSCTRL.DPLLCTRLB.setREFCLK(
+        target::sysctrl::DPLLCTRLB::REFCLK::GCLK);
 
     // PLL96: output to 2*27.1383MHz, divide by 2 later in GEN4
     target::SYSCTRL.DPLLRATIO.setLDR(1695);
     target::SYSCTRL.DPLLRATIO.setLDRFRAC(2);
 
     // PLL96: enable
-    target::SYSCTRL.DPLLCTRLA.setENABLE(1);
+    target::SYSCTRL.DPLLCTRLA.setENABLE(true);
 
     //////////////////////////////////////////////////////////////////////////
 
     // GEN 4: divide PLL96 by two
-    target::GCLK.GENDIV = 2 << 8 | 4;
+    target::GCLK.GENDIV = workGendiv.zero().setID(4).setDIV(2);
 
     // GEN 4: output enabled, generator enabled, clocked from PLL96
-    target::GCLK.GENCTRL = 1 << 19 | 1 << 16 | 8 << 8 | 4;
+    target::GCLK.GENCTRL = workGenctrl.zero()
+                               .setID(4)
+                               .setSRC(target::gclk::GENCTRL::SRC::DPLL96M)
+                               .setOE(true)
+                               .setGENEN(true);
 
     // PA14 to alt. function H (GCLK_IO_4)
-    target::PORT.PMUX[7].setPMUXE(7);
-    target::PORT.PINCFG[14].setPMUXEN(1);
+    target::PORT.PMUX[7].setPMUXE(target::port::PMUX::PMUXE::H);
+    target::PORT.PINCFG[14].setPMUXEN(true);
 
     //////////////////////////////////////////////////////////////////////////
 
     target::PM.APBBMASK.setPORT(1);
     target::PORT.DIRSET.setDIRSET(1 << LED_PIN);
     target::PORT.DIRCLR.setDIRCLR(1 << RF_DATA_PIN);
-    target::PORT.PINCFG[RF_DATA_PIN].setINEN(1);
-    target::PORT.PINCFG[RF_DATA_PIN].setPMUXEN(1);
+    target::PORT.PINCFG[RF_DATA_PIN].setINEN(true);
+    target::PORT.PINCFG[RF_DATA_PIN].setPMUXEN(true);
 
     //////////////////////////////////////////////////////////////////////////
 
     // EIC: clocked from generator 0
     target::GCLK.CLKCTRL = 1 << 14 | 0 << 8 | 0x05;
+    target::GCLK.CLKCTRL = workClkctrl.zero()
+                               .setID(target::gclk::CLKCTRL::ID::EIC)
+                               .setGEN(target::gclk::CLKCTRL::GEN::GCLK0)
+                               .setCLKEN(true);
 
     // EIC: RF_DATA_EXTIN interrupt on rising edge
-    target::EIC.CONFIG.setSENSE(RF_DATA_EXTIN, 1);
-
+    target::EIC.CONFIG.setSENSE(RF_DATA_EXTIN,
+                                target::eic::CONFIG::SENSE::RISE);
 
     // EIC: RF_DATA_EXTIN filter enabled
-    target::EIC.CONFIG.setFILTEN(RF_DATA_EXTIN, 1);
+    target::EIC.CONFIG.setFILTEN(RF_DATA_EXTIN, true);
 
     // EIC: enable
-    target::EIC.CTRL.setENABLE(1);
+    target::EIC.CTRL.setENABLE(true);
 
     // NVIC: EIC interrupt enable
     target::NVIC.ISER.setSETENA(1 << target::interrupts::External::EIC);
@@ -159,27 +159,32 @@ public:
     //////////////////////////////////////////////////////////////////////////
 
     // TC1 & TC2: clocked from generator 0
-    target::GCLK.CLKCTRL =
-        1 << 14 | 0 << 8 | 0x12; // TC1 & TC2 from generator 0
+      target::GCLK.CLKCTRL = workClkctrl.zero()
+                                 .setID(target::gclk::CLKCTRL::ID::TC1_TC2)
+                                 .setGEN(target::gclk::CLKCTRL::GEN::GCLK0)
+                                 .setCLKEN(true);
 
     // PM: power-on TC1
-    target::PM.APBCMASK.setTC(1, 1);
+    target::PM.APBCMASK.setTC(1, true);
 
     // TC1: 32bit mode
-    target::TC1.COUNT32.CTRLA.setMODE(2);
+    target::TC1.COUNT32.CTRLA.setMODE(
+        target::tc::COUNT32::CTRLA::MODE::COUNT32);
 
     // TC1: prescale to tick on 1us
-    target::TC1.COUNT32.CTRLA.setPRESCALER(0x2);
+    target::TC1.COUNT32.CTRLA.setPRESCALER(
+        target::tc::COUNT32::CTRLA::PRESCALER::DIV4);
 
-    target::TC1.COUNT32.CTRLBSET.setONESHOT(1);
-    target::TC1.COUNT32.CTRLBSET.setCMD(2); // STOP
+    target::TC1.COUNT32.CTRLBSET.setONESHOT(true);
+    target::TC1.COUNT32.CTRLBSET.setCMD(
+        target::tc::COUNT32::CTRLBSET::CMD ::STOP); // STOP
     target::TC1.COUNT32.CC[0] = 1000;
-    target::TC1.COUNT32.INTENSET.setMC(0, 1);
+    target::TC1.COUNT32.INTENSET.setMC(0, true);
     target::TC1.COUNT32.CC[1] = 2500;
-    target::TC1.COUNT32.INTENSET.setMC(1, 1);
+    target::TC1.COUNT32.INTENSET.setMC(1, true);
 
     // TC1: enable
-    target::TC1.COUNT32.CTRLA.setENABLE(1);
+    target::TC1.COUNT32.CTRLA.setENABLE(true);
 
     target::NVIC.ISER.setSETENA(1 << target::interrupts::External::TC1);
 
@@ -188,7 +193,7 @@ public:
     decoder.init(1);
 
     // EIC: RF_DATA_EXTIN interrupt enabled
-    target::EIC.INTENSET.setEXTINT(RF_DATA_EXTIN, 1);    
+    target::EIC.INTENSET.setEXTINT(RF_DATA_EXTIN, true);
   }
 
 } app;
@@ -200,10 +205,9 @@ void interruptHandlerTC1() {
   }
 
   if (target::TC1.COUNT32.INTFLAG.getMC(1)) {
-    target::TC1.COUNT32.INTFLAG.setMC(1, 1);    
+    target::TC1.COUNT32.INTFLAG.setMC(1, 1);
     app.decoder.restart();
-  }  
-    
+  }
 }
 
 void interruptHandlerEIC() {

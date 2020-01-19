@@ -3,9 +3,9 @@
 	"version": "1.0.0",
 	"author": "paul",
 	"dependencies": {
-		"@device.farm/si-atsamd11c14a": "^1.0.3",
+		"@device.farm/si-atsamd11c14a": "file:../../si-atsamd11c14a",
 		"@device.farm/si-ookey": "file:../../si-ookey",
-		"@device.farm/si-systick-timer": "^1.0.3"
+		"@device.farm/si-systick-timer": "^1.0.5"
 	},
 	"silicon": {
 		"sources": [
