@@ -10,10 +10,14 @@ public:
   class : public ookey::rx::Decoder {
   public:
     void dataReceived(unsigned short address, unsigned char *data, int len) {
-      target::PORT.OUTTGL.setOUTTGL(1 << LED_PIN);
+      // target::PORT.OUTTGL.setOUTTGL(1 << LED_PIN);
     }
 
   } decoder;
+
+  class : public usb::Device {
+
+  } usb;
 
   void init() {
     atsamd::safeboot::init(SAFE_BOOT_PIN, false, LED_PIN);
@@ -38,17 +42,23 @@ public:
                                .setID(0)
                                .setSRC(target::gclk::GENCTRL::SRC::XOSC)
                                .setGENEN(true);
+    while (target::GCLK.STATUS.getSYNCBUSY())
+      ;
 
     //////////////////////////////////////////////////////////////////////////
     // GEN1: output 32kHz
     //////////////////////////////////////////////////////////////////////////
 
     target::GCLK.GENDIV = workGendiv.zero().setID(1).setDIV(375);
+    while (target::GCLK.STATUS.getSYNCBUSY())
+      ;
 
     target::GCLK.GENCTRL = workGenctrl.zero()
                                .setID(1)
                                .setSRC(target::gclk::GENCTRL::SRC::XOSC)
                                .setGENEN(true);
+    while (target::GCLK.STATUS.getSYNCBUSY())
+      ;
 
     //////////////////////////////////////////////////////////////////////////
     // PLL96: output 54.2766MHz
@@ -58,6 +68,8 @@ public:
                                .setID(target::gclk::CLKCTRL::ID::FDPLL)
                                .setGEN(target::gclk::CLKCTRL::GEN::GCLK1)
                                .setCLKEN(true);
+    while (target::GCLK.STATUS.getSYNCBUSY())
+      ;
 
     target::SYSCTRL.DPLLCTRLB.setREFCLK(
         target::sysctrl::DPLLCTRLB::REFCLK::GCLK);
@@ -72,12 +84,16 @@ public:
     //////////////////////////////////////////////////////////////////////////
 
     target::GCLK.GENDIV = workGendiv.zero().setID(4).setDIV(2);
+    while (target::GCLK.STATUS.getSYNCBUSY())
+      ;
 
     target::GCLK.GENCTRL = workGenctrl.zero()
                                .setID(4)
                                .setSRC(target::gclk::GENCTRL::SRC::DPLL96M)
                                .setOE(true)
                                .setGENEN(true);
+    while (target::GCLK.STATUS.getSYNCBUSY())
+      ;
 
     target::PORT.PMUX[RF_CLK_PIN >> 1].setPMUXE(target::port::PMUX::PMUXE::H);
     target::PORT.PINCFG[RF_CLK_PIN].setPMUXEN(true);
@@ -86,12 +102,20 @@ public:
     // FLL48: output 48MHz
     //////////////////////////////////////////////////////////////////////////
 
+    // See Errata 9905
+    {
+      target::sysctrl::DFLLCTRL::Register r;
+      target::SYSCTRL.DFLLCTRL = r.zero().setENABLE(true).setMODE(true);
+      while (!target::SYSCTRL.PCLKSR.getDFLLRDY())
+        ;
+    }
+
     target::GCLK.CLKCTRL = workClkctrl.zero()
                                .setID(target::gclk::CLKCTRL::ID::DFLL48)
                                .setGEN(target::gclk::CLKCTRL::GEN::GCLK1)
                                .setCLKEN(true);
-
-    // clock domain sync - writes without reads, loop till synced
+    while (target::GCLK.STATUS.getSYNCBUSY())
+      ;
 
     {
       target::sysctrl::DFLLCTRL::Register r;
@@ -107,10 +131,14 @@ public:
         ;
     }
 
+    while (!target::SYSCTRL.PCLKSR.getDFLLRDY() ||
+           !target::SYSCTRL.PCLKSR.getDFLLLCKC() ||
+           !target::SYSCTRL.PCLKSR.getDFLLLCKF())
+      ;
+
     //////////////////////////////////////////////////////////////////////////
     // GEN5: output 48MHz
     //////////////////////////////////////////////////////////////////////////
-
 
     target::GCLK.GENCTRL = workGenctrl.zero()
                                .setID(5)
@@ -121,12 +149,8 @@ public:
     // target::PORT.PMUX[7].setPMUXO(target::port::PMUX::PMUXO::H);
     // target::PORT.PINCFG[15].setPMUXEN(true);
 
-
-    //////////////////////////////////////////////////////////////////////////
-    // USB
-    //////////////////////////////////////////////////////////////////////////
-
-    target::GCLK.CLKCTRL = workClkctrl.zero().setID(target::gclk::CLKCTRL::ID::USB).setGEN(target::gclk::CLKCTRL::GEN::GCLK5);
+    while (target::GCLK.STATUS.getSYNCBUSY())
+      ;
 
     //////////////////////////////////////////////////////////////////////////
     // GPIO
@@ -146,6 +170,8 @@ public:
                                .setID(target::gclk::CLKCTRL::ID::EIC)
                                .setGEN(target::gclk::CLKCTRL::GEN::GCLK0)
                                .setCLKEN(true);
+    while (target::GCLK.STATUS.getSYNCBUSY())
+      ;
 
     target::EIC.CONFIG.setSENSE(RF_DATA_EXTIN,
                                 target::eic::CONFIG::SENSE::RISE);
@@ -164,6 +190,8 @@ public:
                                .setID(target::gclk::CLKCTRL::ID::TC1_TC2)
                                .setGEN(target::gclk::CLKCTRL::GEN::GCLK0)
                                .setCLKEN(true);
+    while (target::GCLK.STATUS.getSYNCBUSY())
+      ;
 
     target::PM.APBCMASK.setTC(1, true);
 
@@ -185,6 +213,19 @@ public:
     target::TC1.COUNT16.CTRLA.setENABLE(true);
 
     target::NVIC.ISER.setSETENA(1 << target::interrupts::External::TC1);
+
+    //////////////////////////////////////////////////////////////////////////
+    // initialize USB
+    //////////////////////////////////////////////////////////////////////////
+
+    target::GCLK.CLKCTRL = workClkctrl.zero()
+                               .setID(target::gclk::CLKCTRL::ID::USB)
+                               .setGEN(target::gclk::CLKCTRL::GEN::GCLK5);
+    while (target::GCLK.STATUS.getSYNCBUSY())
+      ;
+
+    target::NVIC.ISER.setSETENA(1 << target::interrupts::External::USB);
+    usb.init();
 
     //////////////////////////////////////////////////////////////////////////
     // initialize decoder and enable interrupt on RF data pin
@@ -218,6 +259,11 @@ void interruptHandlerEIC() {
         target::tc::COUNT16::CTRLBSET::CMD ::RETRIGGER);
     target::EIC.INTFLAG.setEXTINT(RF_DATA_EXTIN, true);
   }
+}
+
+void interruptHandlerUSB() {
+  target::PORT.OUTSET = 1 << LED_PIN;
+  app.usb.handleInterrupt();
 }
 
 void initApplication() {
